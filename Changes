@@ -1,0 +1,11 @@
+Revision history for Perl extension SVG::TT::Graph.
+
+0.02  Thurs Aug 21 17:16:09 2003
+	- Now with added Pie!!
+	- oh, and tests
+	- and docs
+	- and methods for changing config after constructor
+
+0.01  Wed Aug 20 11:26:09 2003
+	- First public release - well if PAUSE was up
+
