@@ -3,6 +3,7 @@ Makefile.PL
 MANIFEST
 INSTALL
 generate_examples_pl
+timeseries_pl
 t/01_main.t
 t/02_basic.t
 t/03_autoload_methods.t

@@ -3,7 +3,7 @@ package SVG::TT::Graph::Pie;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.06';
+$VERSION = '0.08';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
@@ -402,73 +402,73 @@ __DATA__
 
 
 /* key - MUST match fill styles */
-.key1,.fill1{
+.key1,.dataPoint1{
 	fill: #ff0000;
 	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key2,.fill2{
+.key2,.dataPoint2{
 	fill: #0000ff;
 	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key3,.fill3{
+.key3,.dataPoint3{
 	fill-opacity: 0.5;
 	fill: #00ff00;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key4,.fill4{
+.key4,.dataPoint4{
 	fill-opacity: 0.5;
 	fill: #ffcc00;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key5,.fill5{
+.key5,.dataPoint5{
 	fill-opacity: 0.5;
 	fill: #00ccff;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key6,.fill6{
+.key6,.dataPoint6{
 	fill-opacity: 0.5;
 	fill: #ff00ff;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key7,.fill7{
+.key7,.dataPoint7{
 	fill-opacity: 0.5;
 	fill: #00ff99;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key8,.fill8{
+.key8,.dataPoint8{
 	fill-opacity: 0.5;
 	fill: #ffff00;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key9,.fill9{
+.key9,.dataPoint9{
 	fill-opacity: 0.5;
 	fill: #cc6666;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key10,.fill10{
+.key10,.dataPoint10{
 	fill-opacity: 0.5;
 	fill: #663399;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key11,.fill11{
+.key11,.dataPoint11{
 	fill-opacity: 0.5;
 	fill: #339900;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key12,.fill12{
+.key12,.dataPoint12{
 	fill-opacity: 0.5;
 	fill: #9966FF;
 	stroke: none;
