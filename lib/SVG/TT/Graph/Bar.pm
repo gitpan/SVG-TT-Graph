@@ -3,7 +3,7 @@ package SVG::TT::Graph::Bar;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
@@ -27,7 +27,7 @@ SVG::TT::Graph::Bar - Create presentation quality SVG bar graphs easily
   my $graph = SVG::TT::Graph::Bar->new({
   	'height' => '500',
 	'width' => '300',
-	'xfields' => \@fields,
+	'fields' => \@fields,
   });
   
   $graph->add_data({
@@ -58,15 +58,17 @@ title, subtitle etc.
   
   my $graph = SVG::TT::Graph::Bar->new({
     # Required
-    'xfields' => \@fields,
+    'fields' => \@fields,
   
     # Optional - defaults shown
     'height'            => '500',
     'width'             => '300',
     'show_data_values'  => 1,
 
-    'y_marker'          => '20',
-    'y_start'           => '0',
+    'scale_divisions'   => '',
+    'min_scale_value'           => '0',
+	'stagger_x_labels'  => 0,
+	'bar_gap'           => 1,
 
     'show_x_labels'     => 1,
     'show_y_labels'     => 1,
@@ -86,7 +88,7 @@ title, subtitle etc.
     'style_sheet'       => '/includes/graph.css',
   });
 
-The constructor takes a hash reference, xfields (the names for each
+The constructor takes a hash reference, fields (the names for each
 field on the X axis) MUST be set, all other values are defaulted to those
 shown above - with the exception of style_sheet which defaults
 to using the internal style sheet.
@@ -158,21 +160,34 @@ an external file and edit from there.
 
 Show the value of each element of data on the graph
 
-=item y_start()
+=item bar_gap()
+
+Whether to have a gap between the bars or not, default
+is '1', set to '0' if you don't want gaps.
+
+=item min_scale_value()
 
 The point at which the Y axis starts, defaults to '0',
 if set to '' it will default to the minimum data value.
 
-=item y_marker()
+=item scale_divisions()
 
 This defines the gap between markers on the Y axis,
 default is a 10th of the max_value, e.g. you will have
-10 markers on the Y axis.
+10 markers on the Y axis. NOTE: do not set this too
+low - you are limited to 999 markers, after that the
+graph won't generate.
 
 =item show_x_labels()
 
 Whether to show labels on the X axis or not, defaults
 to 1, set to '0' if you want to turn them off.
+
+=item stagger_x_labels()
+
+This puts the labels at alternative levels so if they
+are long field names they will not overlap so easily.
+Default it '0', to turn on set to '1'.
 
 =item show_y_labels()
 
@@ -273,10 +288,10 @@ sub get_template {
 
 sub _init {
 	my $self = shift;
-	croak "xfields was not supplied or is empty" 
-	unless defined $self->{'config'}->{xfields} 
-	&& ref($self->{'config'}->{xfields}) eq 'ARRAY'
-	&& scalar(@{$self->{'config'}->{xfields}}) > 0;
+	croak "fields was not supplied or is empty" 
+	unless defined $self->{'config'}->{fields} 
+	&& ref($self->{'config'}->{fields}) eq 'ARRAY'
+	&& scalar(@{$self->{'config'}->{fields}}) > 0;
 }
 
 sub _set_defaults {
@@ -288,12 +303,14 @@ sub _set_defaults {
 		'style_sheet'       => '',
 	    'show_data_values'  => 1,
 	
-	    'y_start'           => '0',
-		'y_marker'			=> '',
+	    'min_scale_value'   => '0',
+		'scale_divisions'	=> '',
+		'bar_gap'			=> 1,
 
 	    'show_x_labels'     => 1,
+		'stagger_x_labels'	=> 0,
 	    'show_y_labels'     => 1,
-	
+
 	    'show_x_title'      => 0,
 	    'x_title'           => 'X Field names',
 	
@@ -327,6 +344,10 @@ __DATA__
 [% END %]
 
 <svg width="[% config.width %]" height="[% config.height %]" viewBox="0 0 [% config.width %] [% config.height %]" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\  -->
+<!-- Created with SVG::TT::Graph   -->
+<!-- Stephen Morgan / Leo Lapworth -->
+<!-- ////////////////////////////  -->
 
 [% IF stylesheet == 'excluded' %]
 <!-- include default stylesheet if none specified -->
@@ -409,157 +430,69 @@ __DATA__
 	font-weight: normal;
 }
 
-/* default fill styles */
-.fill1{
-	fill: #cc0000;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill2{
-	fill: #0000cc;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill3{
-	fill: #00cc00;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill4{
-	fill: #ffcc00;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill5{
-	fill: #00ccff;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill6{
-	fill: #ff00ff;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill7{
-	fill: #00ffff;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill8{
-	fill: #ffff00;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill9{
-	fill: #cc6666;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill10{
-	fill: #663399;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-/* default line styles */
-.line1{
+.staggerGuideLine{
 	fill: none;
-	stroke: #ff0000;
-	stroke-width: 1px;	
+	stroke: #000000;
+	stroke-width: 0.5px;	
 }
-.line2{
-	fill: none;
-	stroke: #0000ff;
-	stroke-width: 1px;	
-}
-.line3{
-	fill: none;
-	stroke: #00ff00;
-	stroke-width: 1px;	
-}
-.line4{
-	fill: none;
-	stroke: #ffcc00;
-	stroke-width: 1px;	
-}
-.line5{
-	fill: none;
-	stroke: #00ccff;
-	stroke-width: 1px;	
-}
-.line6{
-	fill: none;
-	stroke: #ff00ff;
-	stroke-width: 1px;	
-}
-.line7{
-	fill: none;
-	stroke: #00ffff;
-	stroke-width: 1px;	
-}
-.line8{
-	fill: none;
-	stroke: #ffff00;
-	stroke-width: 1px;	
-}
-.line9{
-	fill: none;
-	stroke: #ccc6666;
-	stroke-width: 1px;	
-}
-.line10{
-	fill: none;
-	stroke: #663399;
-	stroke-width: 1px;	
-}
-
-/* default line styles */
-.key1,.dataPoint1{
+/* default fill styles for multiple datasets (probably only use a single dataset on this graph though) */
+.key1,.fill1{
 	fill: #ff0000;
+	fill-opacity: 0.2;
 	stroke: none;
-	stroke-width: 1px;	
+	stroke-width: 0.5px;	
 }
-.key2,.dataPoint2{
+.key2,.fill2{
 	fill: #0000ff;
+	fill-opacity: 0.2;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key3,.dataPoint3{
+.key3,.fill3{
 	fill: #00ff00;
+	fill-opacity: 0.2;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key4,.dataPoint4{
+.key4,.fill4{
 	fill: #ffcc00;
+	fill-opacity: 0.2;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key5,.dataPoint5{
+.key5,.fill5{
 	fill: #00ccff;
+	fill-opacity: 0.2;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key6,.dataPoint6{
+.key6,.fill6{
 	fill: #ff00ff;
+	fill-opacity: 0.2;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key7,.dataPoint7{
+.key7,.fill7{
 	fill: #00ffff;
+	fill-opacity: 0.2;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key8,.dataPoint8{
+.key8,.fill8{
 	fill: #ffff00;
+	fill-opacity: 0.2;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key9,.dataPoint9{
+.key9,.fill9{
 	fill: #cc6666;
+	fill-opacity: 0.2;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key10,.dataPoint10{
+.key10,.fill10{
 	fill: #663399;
+	fill-opacity: 0.2;
 	stroke: none;
 	stroke-width: 1px;	
 }
@@ -575,7 +508,7 @@ __DATA__
 </defs>
 [% END %]
 <!-- svg bg -->
-	<rect x="0" y="0" width="[% config.width %]" height="[% config.height %]" class="svgBackground"/>
+<rect x="0" y="0" width="[% config.width %]" height="[% config.height %]" class="svgBackground"/>
 	
 <!-- ///////////////// CALCULATE GRAPH AREA AND BOUNDARIES //////////////// -->
 <!-- get dimensions of actual graph area (NOT SVG area) -->
@@ -586,47 +519,13 @@ __DATA__
 	[% x = 0 %]
 	[% y = 0 %]
 	
-<!-- CALC WIDTH AND X COORD DIMENSIONS -->
-	<!-- reduce width of graph area if there is labelling on y axis -->
-	[% IF config.show_y_labels %][% w = w - 30 %][% x = x + 30 %][% END %]
-	[% IF config.show_y_title %][% w = w - 20 %][% x = x + 20 %][% END %]
-
-	<!-- pad ends of graph if there are x labels -->
-	[% IF config.show_x_labels %]
-		[% w = w - 10 %]
-	<!-- if there are no y labels or titles BUT there are x labels, then pad left -->
-		[% IF !config.show_y_labels && !config.show_y_title %]
-			[% w = w - 10 %]
-			[% x = x + 10 %]
-		[% END %]
-	[% END %]
-	
-
-<!-- CALC HEIGHT AND Y COORD DIMENSIONS -->
-	<!-- reduce height of graph area if there is labelling on x axis -->
-	[% IF config.show_x_labels %][% h = h - 20 %][% END %]
-	[% IF config.show_x_title %][% h = h - 25 %][% END %]
-	
-	<!-- pad top of graph if y axis has data labels so labels do not get chopped off -->
-	[% IF config.show_y_labels %][% h = h - 10 %][% y = y + 10 %][% END %]
-	
-	<!-- reduce height if graph has title or subtitle -->
-	[% IF config.show_graph_title %][% h = h - 25 %][% y = y + 25 %][% END %]
-	[% IF config.show_graph_subtitle %][% h = h - 10 %][% y = y + 10 %][% END %]
-
-	
-<!-- reduce graph dimensions if there is a KEY -->
-	[% IF config.key && config.key_position == 'right' %][% w = w - 150 %]
-	[% ELSIF config.key && config.key_position == 'bottom' %][% h = h - 50 %]
-	[% END %]
-
-
-
+	[% char_width = 9 %]
 
 <!-- calc min and max values -->
-	[% min_value = 99999999 %]
+	[% min_value = 99999999999 %]
 	[% max_value = 0 %]
-	[% FOREACH field = config.xfields %]
+	[% max_key_size = 0 %]
+	[% FOREACH field = config.fields %]
 		[% FOREACH dataset = data %]
 			[% IF min_value > dataset.data.$field && dataset.data.$field != '' %]
 				[% min_value = dataset.data.$field %]
@@ -634,41 +533,127 @@ __DATA__
 			[% IF max_value < dataset.data.$field && dataset.data.$field != '' %]
 				[% max_value = dataset.data.$field %]
 			[% END %]
+		<!-- find largest dataset title for Key size -->
+			[% IF max_key_size < dataset.title.length %]
+				[% max_key_size = dataset.title.length %]
+			[% END %]
 		[% END %]
 	[% END %]
+
+
 	
-	[% IF config.y_start || config.y_start == '0' %]
-		[% y_start = config.y_start %]
+	
+
+<!-- CALC HEIGHT AND Y COORD DIMENSIONS -->
+	<!-- reduce height of graph area if there is labelling on x axis -->
+	[% IF config.show_x_labels %][% h = h - 20 %][% END %]
+	
+	<!-- stagger x labels if overlapping occurs -->
+	[% stagger = 0 %]
+	[% IF config.stagger_x_labels %]
+		[% stagger = 17 %]
+		[% h = h - stagger %]
+	[% END %]
+	
+	[% IF config.show_x_title %][% h = h - 25 - stagger %][% END %]
+	
+	<!-- pad top of graph if y axis has data labels so labels do not get chopped off -->
+	[% IF config.show_y_labels %][% h = h - 10 %][% y = y + 10 %][% END %]
+	
+	<!-- reduce height if graph has title or subtitle -->
+	[% IF config.show_graph_title %][% h = h - 25 %][% y = y + 25 %][% END %]
+	[% IF config.show_graph_subtitle %][% h = h - 10 %][% y = y + 10 %][% END %]
+	
+
+	
+<!-- reduce graph dimensions if there is a KEY -->
+	[% key_box_size = 12 %]
+	
+	[% IF config.key && config.key_position == 'right' %][% w = w - (max_key_size * (char_width - 1)) - (key_box_size * 3 ) %]
+	[% ELSIF config.key && config.key_position == 'bottom' %][% h = h - 50 %]
+	[% END %]
+
+	<!-- find start value for scale on y axis -->
+	[% IF config.min_scale_value || config.min_scale_value == '0' %]
+		[% min_scale_value = config.min_scale_value %]
 	[% ELSE %]
-		<!-- setting lowest value to be min_value as no y_start defined -->
-		[% y_start = min_value %]
+		<!-- setting lowest value to be min_value as no min_scale_value defined -->
+		[% min_scale_value = min_value %]
 	[% END %]
 	
 	<!-- base line -->
 	[% base_line = h + y %]
 	
-	<!-- how much padding above max point on graph -->
-	[% IF (max_value - y_start) == 0 %]
-		[% y_top_pad = 10 %]
+	<!-- how much padding between largest bar and top of graph -->
+	[% IF (max_value - min_scale_value) == 0 %]
+		[% top_pad = 10 %]
 	[% ELSE %]
-		[% y_top_pad = (max_value - y_start) / 20 %]	
-	[% END %]
+		[% top_pad = (max_value - min_scale_value) / 20 %]	
+	[% END %]	
 	
-	[% y_range = (max_value + y_top_pad) - y_start %]
+	[% scale_range = (max_value + top_pad) - min_scale_value %]
 
-	<!-- setup y_marker - gap between markers -->
-	[% IF config.y_marker %]
-		[% y_marker = config.y_marker %]
+	<!-- default to 10 scale_divisions if none have been set -->
+	[% IF config.scale_divisions %]
+		[% scale_division = config.scale_divisions %]
 	[% ELSE %]
-		[% y_marker = (max_value / 10)  %]
-		[% IF max_value > 10 %]
-			[% y_marker = y_marker FILTER format('%02.0f') %]
+		[% scale_division = scale_range / 10 FILTER format('%2.0f') %]
+	[% END %]
+
+<!-- JUMP THE GUN AND CALC BAR WIDTHS AS THESE ARE USED FOR PADDING IF LARGE X LABELS ARE USED -->
+<!-- get number of data points on x scale -->
+[% dx = config.fields.size %]
+
+<!-- get distribution width on x axis -->
+[% data_widths_x = w / dx %]
+[% dw = data_widths_x FILTER format('%2.02f') %]
+
+
+
+<!-- CALC WIDTH AND X COORD DIMENSIONS -->
+	<!-- reduce width of graph area if there is large labelling on x axis -->
+	[% half_label_width = (config.fields.0.length / 2) * char_width %]
+	
+	[% IF half_label_width > (dw / 2) %]
+		<!-- calc difference and pad accordingly -->
+		[% space_b4_y_axis = half_label_width - (dw / 2) %]
+		<!-- only need to pad the left side if a key is present -->
+		[% IF config.key && config.key_position == 'right' %]
+			[% w = w - space_b4_y_axis %]
 		[% ELSE %]
-			[% y_marker = y_marker FILTER format('%02.2f') %]
-		[% END %]		
+			<!-- pad both sides -->
+			[% w = w - (space_b4_y_axis * 2) %]
+		[% END %]
+		[% x = x + space_b4_y_axis %]
 	[% END %]
 	
+	<!-- find the string length of max value -->
+	[% max_value_length = max_value.length %]
 	
+	<!-- label width in pixels -->
+	[% max_value_length_px = max_value_length * char_width %]
+	<!-- If the y labels are shown but the size of the x labels are small, pad for y labels -->
+	
+	[% IF config.show_y_labels && space_b4_y_axis < max_value_length_px %]
+		<!-- allow slightly more padding if small labels -->
+		[% IF max_value_length < 2 %]
+			[% w = w - (max_value_length * (char_width * 2)) %]
+			[% x = x + (max_value_length * (char_width * 2)) %]
+		[% ELSE %]
+			[% w = w - max_value_length_px %]
+			[% x = x + max_value_length_px %]
+		[% END %]
+	[% END %]
+	
+	[% IF config.show_y_title && space_b4_y_axis < max_value_length_px %]
+		[% w = w - 25 %]
+		[% x = x + 25 %]
+	[% END %]
+		
+
+
+
+
 <!-- //////////////////////////////  BUILD GRAPH AREA ////////////////////////////// -->
 <!-- graph bg -->
 	<rect x="[% x %]" y="[% y %]" width="[% w %]" height="[% h %]" class="graphBackground"/>
@@ -679,7 +664,7 @@ __DATA__
 
 <!-- //////////////////////////////  AXIS DISTRIBUTIONS //////////////////////////// -->
 	<!-- get number of data points on x scale -->
-	[% dx = config.xfields.size %]
+	[% dx = config.fields.size %]
 		<!-- ensure x_data_points butt up to edge of graph -->
 		[%# dx = dx - 1 %]
 		[% dx = dx %]
@@ -690,28 +675,42 @@ __DATA__
 [% i = dw %]
 [% count = 0 %]
 
+[% IF config.bar_gap %]
+	[% bar_gap = 10 %]
+[% ELSE %]
+	[% bar_gap = 0 %]
+[% END %]
+
+[% stagger_count = 0 %]
 <!-- x axis labels -->
 [% IF config.show_x_labels %]
-	[% FOREACH field = config.xfields %]
+	[% FOREACH field = config.fields %]
 		[% IF count == 0 %]
-<text x="[% x + (dw / 2) %]" y="[% base_line + 15 %]" class="xAxisLabels">[% field %]</text>
+<text x="[% x + (dw / 2) - (bar_gap / 2) %]" y="[% base_line + 15 %]" class="xAxisLabels">[% field %]</text>
 		[% i = i - dw %]
 		[% ELSE %]
-<text x="[% x + i + (dw / 2) %]" y="[% base_line + 15 %]" class="xAxisLabels">[% field %]</text>
+			[% IF stagger_count == 2 %]
+				<text x="[% x + i + (dw / 2) - (bar_gap / 2) %]" y="[% base_line + 15 %]" class="xAxisLabels">[% field %]</text>
+				[% stagger_count = 0 %]
+			[% ELSE %]
+				<text x="[% x + i + (dw / 2) - (bar_gap / 2) %]" y="[% base_line + 15 + stagger %]" class="xAxisLabels">[% field %]</text>
+				<path d="M[% x + i + (dw / 2) - (bar_gap / 2) %] [% base_line %], v[% stagger %]" class="staggerGuideLine" />
+			[% END %]
 		[% END %]
 	[% i = i + dw %]
 	[% count = count + 1 %]
+	[% stagger_count = stagger_count + 1 %]
 	[% END %]
 [% END %]
 
 
 <!-- distribute Y scale -->
-[% dy = y_range / y_marker %]
+[% dy = scale_range / scale_division %]
 <!-- ensure y_data_points butt up to edge of graph -->
 [% y_marker_height = h / dy %]
 [% dy = y_marker_height.match('(\d+[\.\d\d])').0 %]
 [% count = 0 %]
-[% y_value = y_start %]
+[% y_value = min_scale_value %]
 [% IF config.show_y_labels %]
 	[% WHILE (dy * count) < h %]
 		[% IF count == 0 %]
@@ -721,7 +720,7 @@ __DATA__
 			<text x="[% x - 5 %]" y="[% base_line - (dy * count) %]" class="yAxisLabels">[% y_value %]</text>
 			<path d="M[% x %] [% base_line - (dy * count) %] h[% w %]" class="guideLines"/>
 		[% END %]
-		[% y_value = y_value + y_marker %]
+		[% y_value = y_value + scale_division %]
 		[% count = count + 1 %]
 	[% END %]
 [% END %]
@@ -738,7 +737,7 @@ __DATA__
 		[% ELSE %]
 			[% y_xtitle = 35 %]
 		[% END %]
-		<text x="[% (w / 2) + x %]" y="[% h + y + y_xtitle %]" class="xAxisTitle">[% config.x_title %]</text>
+		<text x="[% (w / 2) + x %]" y="[% h + y + y_xtitle + stagger %]" class="xAxisTitle">[% config.x_title %]</text>
 	[% END %]	
 
 <!-- y axis title -->
@@ -750,38 +749,29 @@ __DATA__
 
 
 <!-- //////////////////////////////  SHOW DATA ////////////////////////////// -->
-[% bar_width = dw - 10 %]
+[% bar_width = dw - bar_gap %]
 
-[% divider = dy / y_marker %]
+[% divider = dy / scale_division %]
 <!-- data points on graph -->
-	[% IF config.show_data_points || config.show_data_values %]
-		[% xcount = 0 %]
-		
-		[% FOREACH field = config.xfields %]
+[% IF config.show_data_points || config.show_data_values %]
+	[% xcount = 0 %]
+	
+	[% FOREACH field = config.fields %]
 		[% dcount = 1 %]
-		
-<!-- find the lowest data value for each dataset -->
+		<!-- find the lowest data value for each dataset -->
 
-
-		
-			[% FOREACH dataset = data %]
-				[% IF config.show_data_points %]
-		<path d="M[% (dw * xcount) + x %] [% base_line %] V[% base_line - (dataset.data.$field * divider) %] h[% bar_width %] V[% base_line %] Z" class="fill[% dcount %]"/>
-				[% END %]
-			
+		[% FOREACH dataset = data %]
+			<path d="M[% (dw * xcount) + x %] [% base_line %] V[% base_line - (dataset.data.$field * divider) %] h[% bar_width %] V[% base_line %] Z" class="fill[% dcount %]"/>
 			[% IF config.show_data_values %]
-		<text x="[% (dw * xcount) + x + (dw / 2) %]" y="[% base_line - (dataset.data.$field * divider) - 6 %]" class="dataPointLabel">[% dataset.data.$field %]</text>
+				<text x="[% (dw * xcount) + x + (dw / 2) - (bar_gap / 2) %]" y="[% base_line - (dataset.data.$field * divider) - 6 %]" class="dataPointLabel">[% dataset.data.$field %]</text>
 			[% END %]
 			[% dcount = dcount + 1 %]	
 		[% END %]
-			[% xcount = xcount + 1 %]		
-		[% END %]
+		[% xcount = xcount + 1 %]		
 	[% END %]
-
-
+[% END %]
 
 <!-- //////////////////////////////// KEY /////// ////////////////////////// -->
-[% key_box_size = 12 %]
 [% key_count = 1 %]
 [% key_padding = 5 %]
 [% IF config.key && config.key_position == 'right' %]
@@ -815,7 +805,7 @@ __DATA__
 
 <!-- main graph title -->
 	[% IF config.show_graph_title %]
-		<text x="[% w / 2 %]" y="15" class="mainTitle">[% config.graph_title %]</text>
+		<text x="[% config.width / 2 %]" y="15" class="mainTitle">[% config.graph_title %]</text>
 	[% END %]
 
 <!-- graph sub title -->
@@ -825,6 +815,6 @@ __DATA__
 		[% ELSE %]
 			[% y_subtitle = 15 %]
 		[% END %]
-		<text x="[% w / 2 %]" y="[% y_subtitle %]" class="subTitle">[% config.graph_subtitle %]</text>
+		<text x="[% config.width / 2 %]" y="[% y_subtitle %]" class="subTitle">[% config.graph_subtitle %]</text>
 	[% END %]
 </svg>

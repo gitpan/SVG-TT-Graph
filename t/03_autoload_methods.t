@@ -10,7 +10,7 @@ BEGIN { use_ok( 'SVG::TT::Graph::Line' ); }
 my @fields = qw(Jan Feb Mar);
 
 my $graph = SVG::TT::Graph::Line->new({
-	'xfields' => \@fields,
+	'fields' => \@fields,
 });
 
 is($graph->show_y_labels(),1,'default show_y_lables match');

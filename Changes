@@ -1,5 +1,16 @@
 Revision history for Perl extension SVG::TT::Graph.
 
+0.03  Wed Aug 28 
+	- Doc fix thanks to Mike Castle
+	- Renaming (sorry, thought it best to do ASAP)
+		- y_marker	to	scale_divisions
+		- xfields   to  fields
+		- y_start   to  min_scale_value
+	- stagger_x_labels method added to Bar and Line
+	- bar_gap method added to Bar and BarHorizontal
+	- made the padding clever depending on length 
+	  of labels, including the key.
+	
 0.02  Thurs Aug 21 17:16:09 2003
 	- Now with added Pie!!
 	- oh, and tests

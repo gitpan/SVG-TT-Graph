@@ -25,10 +25,10 @@ foreach my $type (@types) {
 		my $gr = $module->new({
 		});
 	};
-	ok($@,'Croak ok as no xfields supplied');
+	ok($@,'Croak ok as no fields supplied');
 
 	my $graph = $module->new({
-		'xfields' => \@fields,
+		'fields' => \@fields,
 	});
 
 

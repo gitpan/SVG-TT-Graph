@@ -3,7 +3,7 @@ package SVG::TT::Graph::Pie;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
@@ -27,7 +27,7 @@ SVG::TT::Graph::Pie - Create presentation quality SVG pie graphs easily
   my $graph = SVG::TT::Graph::Pie->new({
   	'height' => '500',
 	'width' => '300',
-	'xfields' => \@fields,
+	'fields' => \@fields,
   });
   
   $graph->add_data({
@@ -58,7 +58,7 @@ title, subtitle etc.
   
   my $graph = SVG::TT::Graph::Pie->new({
     # Required
-    'xfields' => \@fields,
+    'fields' => \@fields,
 
     # Optional - defaults shown
     'height'            => '500',
@@ -93,7 +93,7 @@ title, subtitle etc.
 
   });
 
-The constructor takes a hash reference, xfields (the name for each
+The constructor takes a hash reference, fields (the name for each
 slice on the pie) MUST be set, all other values are defaulted to those
 shown above - with the exception of style_sheet which defaults
 to using the embeded style sheet.
@@ -296,10 +296,10 @@ sub get_template {
 
 sub _init {
 	my $self = shift;
-	croak "xfields was not supplied or is empty" 
-	unless defined $self->{'config'}->{xfields} 
-	&& ref($self->{'config'}->{xfields}) eq 'ARRAY'
-	&& scalar(@{$self->{'config'}->{xfields}}) > 0;
+	croak "fields was not supplied or is empty" 
+	unless defined $self->{'config'}->{fields} 
+	&& ref($self->{'config'}->{fields}) eq 'ARRAY'
+	&& scalar(@{$self->{'config'}->{fields}}) > 0;
 }
 
 sub _set_defaults {
@@ -354,6 +354,11 @@ __DATA__
 [% END %]
 
 <svg width="[% config.width %]" height="[% config.height %]" viewBox="0 0 [% config.width %] [% config.height %]" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+<!-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\  -->
+<!-- Created with SVG::TT::Graph   -->
+<!-- Stephen Morgan / Leo Lapworth -->
+<!-- ////////////////////////////  -->
 <defs>
 	<radialGradient id="shadow">
 		<stop offset="85%" style="stop-color: #ccc;"/>
@@ -492,6 +497,26 @@ __DATA__
 	[% h = config.height %]
 	[% Pi = 3.14159 %]
 
+<!-- calc min and max values -->
+	[% count = 0 %]
+	[% min_value = 99999999999 %]
+	[% max_value = 0 %]
+	[% max_key_size = 0 %]
+	[% FOREACH field = config.fields %]
+		[% total = total + data.0.data.$field %]
+		[% count = count + 1 %]
+		[% IF min_value > data.0.data.$field && data.0.data.$field != '' %]
+			[% min_value = data.0.data.$field %]
+		[% END %]
+		[% IF max_value < data.0.data.$field && data.0.data.$field != '' %]
+			[% max_value = data.0.data.$field %]
+		[% END %]
+		<!-- find largest dataset title for Key size -->
+		[% IF max_key_size < dataset.title.length %]
+			[% max_key_size = dataset.title.length %]
+		[% END %]
+	[% END %]
+		
 <!-- reduce height if graph has title or subtitle -->
 	[% IF config.show_graph_title %][% h = h - 25 %][% END %]
 	[% IF config.show_graph_subtitle %][% h = h - 10 %][% END %]
@@ -503,8 +528,6 @@ __DATA__
 <!-- move centre of pie chart if title present -->
 	[% IF config.show_graph_title %][% y = y + 15 %][% END %]
 	[% IF config.show_graph_subtitle %][% y = y + 10 %][% END %]
-	
-
 
 	[% padding = 30 %]
 	
@@ -561,6 +584,7 @@ __DATA__
 
 <!-- if chart expanded -->
 [% IF config.expanded OR config.expand_greatest %]
+	<!-- HERE -->
 	[% e = 10 %]
 [% ELSE %]
 	[% e = 0 %]
@@ -577,31 +601,15 @@ __DATA__
 	
 	[% IF !config.expanded && !config.expand_greatest %]
 	<!-- only show shadow if not expanded -->
-<circle cx="[% x + config.shadow_offset %]" cy="[% y + config.shadow_offset %]" r="[% shadow_size + e %]" style="fill: url(#shadow); stroke: none;"/>
+<circle cx="[% x + config.shadow_depth %]" cy="[% y + config.shadow_depth %]" r="[% shadow_size + e %]" style="fill: url(#shadow); stroke: none;"/>
 	[% END %]
 	
 [% END %]
 
 <circle cx="[% x %]" cy="[% y %]" r="[% r + e %]" fill="#ffffff"/>
 
-[% min_value = 99999999 %]
-[% max_value = 0 %]
-<!-- calc grand total and min and max values -->
-[% count = 0 %]
-[% FOREACH field = config.xfields %]
-		[% total = total + data.0.data.$field %]	
-		[% count = count + 1 %]
-
-		[% IF min_value > data.0.data.$field && data.0.data.$field != '' %]
-			[% min_value = data.0.data.$field %]
-		[% END %]
-		[% IF max_value < data.0.data.$field && data.0.data.$field != '' %]
-			[% max_value = data.0.data.$field %]
-		[% END %]
-[% END %]
-
 [% px_start = x + r %]
-[% py_start = y %]
+[% pmin_scale_value = y %]
 
 [% values = 0 %]
 <!-- half values used to show values next to wedges -->
@@ -616,7 +624,8 @@ __DATA__
 
 	
 [% count = 1 %]
-[% FOREACH field = config.xfields %]
+[% FOREACH field = config.fields %]
+	[% FOREACH dataset = data %]
 
 		[% value = data.0.data.$field %]
 		[% value_half = data.0.data.$field / 2 %]
@@ -653,24 +662,24 @@ __DATA__
 		[% re = r / e %]
 		[% xe = re * cos(radians_half) FILTER format('%02.10f') %]
 		[% ye = re * sin(radians_half) FILTER format('%02.10f') %]
-		<path d="M[% px_start + xe %] [% py_start + ye %] A[% r %] [% r %], 0, 
+		<path d="M[% px_start + xe %] [% pmin_scale_value + ye %] A[% r %] [% r %], 0, 
 		[% IF degrees > 180 && py_end < y %]0[% ELSIF degrees > 180 %]1[% ELSE %]0[% END %], 1, [% x + px_end + xe %] [% y + py_end + ye %] L[% x + xe %] [% y + ye %], Z" class="fill[% count %]"/>
 	
 	[% ELSIF !config.expanded && config.expand_greatest %]
-		
+		<!-- THERE -->
 		[% IF data.0.data.$field == max_value %]
 		[% re = r / e %]
 		[% xe = re * cos(radians_half) FILTER format('%02.10f') %]
 		[% ye = re * sin(radians_half) FILTER format('%02.10f') %]
-		<path d="M[% px_start + xe %] [% py_start + ye %] A[% r %] [% r %], 0, 
+		<path d="M[% px_start + xe %] [% pmin_scale_value + ye %] A[% r %] [% r %], 0, 
 		[% IF degrees > 180 && py_end < y %]0[% ELSIF degrees > 180 %]1[% ELSE %]0[% END %], 1, [% x + px_end + xe %] [% y + py_end + ye %] L[% x + xe %] [% y + ye %], Z" class="fill[% count %]"/>
 		[% ELSE %]
-			<path d="M[% px_start %] [% py_start %] A[% r %] [% r %], 0, 
+			<path d="M[% px_start %] [% pmin_scale_value %] A[% r %] [% r %], 0, 
 		[% IF degrees > 180 && py_end < y %]0[% ELSIF degrees > 180 %]1[% ELSE %]0[% END %], 1, [% x + px_end %] [% y + py_end %] L[% x %] [% y %], Z" class="fill[% count %]"/>	
 		[% END %]
 	
 	[% ELSE %]
-		<path d="M[% px_start %] [% py_start %] A[% r %] [% r %], 0, 
+		<path d="M[% px_start %] [% pmin_scale_value %] A[% r %] [% r %], 0, 
 		[% IF degrees > 180 && py_end < y %]0[% ELSIF degrees > 180 %]1[% ELSE %]0[% END %], 1, [% x + px_end %] [% y + py_end %] L[% x %] [% y %], Z" class="fill[% count %]"/>	
 	[% END %]
 	
@@ -687,9 +696,10 @@ __DATA__
 		[% END %]
 		
 		[% px_start = x + px_end %]
-		[% py_start = y + py_end %]
+		[% pmin_scale_value = y + py_end %]
 		[% last_value_half = value_half %]
 		[% count = count + 1 %]
+	[% END %]
 [% END %]
 
 
@@ -702,7 +712,7 @@ __DATA__
 
 [% IF config.key && key_position == 'h' %]
 	
-	[% FOREACH field = config.xfields %]
+	[% FOREACH field = config.fields %]
 	
 	[% percent = (100 / total) * data.0.data.$field FILTER format('%2.0f')%]
 		<!-- position key left or right -->
@@ -727,7 +737,7 @@ __DATA__
 	[%# y_key_start = y_key %]
 	[% x_key = padding %]
 	
-	[% FOREACH field = config.xfields %]
+	[% FOREACH field = config.fields %]
 	
 	[% percent = (100 / total) * data.0.data.$field FILTER format('%2.0f')%]
 	

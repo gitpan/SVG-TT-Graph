@@ -5,7 +5,7 @@ use Carp;
 use vars qw($VERSION $AUTOLOAD);
 use Template;
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 # set up TT object
 my %config = (
@@ -21,7 +21,7 @@ SVG::TT::Graph - Base object for generating SVG Graphs
 =head1 SYNOPSIS
 
   package SVG::TT::Graph::GRAPH_TYPE
-  use SVG::Graph;
+  use SVG::TT::Graph;
   use base qw(SVG::TT::Graph);
 
   sub _set_defaults {
@@ -57,11 +57,11 @@ SVG::TT::Graph - Base object for generating SVG Graphs
   
   my $width = '500',
   my $heigh = '300',
-  my @xfields = qw(field_1 field_2 field_3);
+  my @fields = qw(field_1 field_2 field_3);
   
   my $graph = SVG::TT::Graph::GRAPH_TYPE->new({
     # Required for some graph types
-    'xfields'           => \@xfields,
+    'fields'           => \@fields,
     # .. other config options
     'height' => '500',
   });
@@ -139,13 +139,13 @@ sub add_data {
 		$self->{'data'} = \@data;
 	}
 	
-	croak 'no xfields array ref' 
-	unless defined $self->{'config'}->{'xfields'} 
-	&& ref($self->{'config'}->{'xfields'}) eq 'ARRAY';
+	croak 'no fields array ref' 
+	unless defined $self->{'config'}->{'fields'} 
+	&& ref($self->{'config'}->{'fields'}) eq 'ARRAY';
 
 	if(defined $conf->{'data'} && ref($conf->{'data'}) eq 'ARRAY') {
 		my %new_data;
-		@new_data{@{$self->{'config'}->{'xfields'}}} = @{$conf->{'data'}};
+		@new_data{@{$self->{'config'}->{'fields'}}} = @{$conf->{'data'}};
 		my %store = (
 			'data' => \%new_data,
 		);
@@ -210,8 +210,8 @@ sub burn {
 	my $template_responce = $tt->process( \$template, \%vals, \$file );
 
 	if($tt->error()) {
-		require Data::Dumper;
-		croak "Template error: " . $tt->error . "\n" . Dumper($self) if $tt->error;
+#		require Data::Dumper;
+		croak "Template error: " . $tt->error . "\n" if $tt->error;
 	}
 	return $file;
 }
@@ -278,7 +278,7 @@ Thanks to Foxtons for letting us put this on CPAN.
 
 =head1 AUTHOR
 
-Leo Lapworth (LLAP@cuckoo.org)
+Leo Lapworth (LLAP@cuckoo.org) and Stephen Morgan (TT and SVG)
 
 =head1 SEE ALSO
 

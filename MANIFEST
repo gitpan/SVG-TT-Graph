@@ -2,6 +2,7 @@ Changes
 Makefile.PL
 MANIFEST
 README
+generate_examples.pl
 t/01_main.t
 t/02_basic.t
 t/03_autoload_methods.t
