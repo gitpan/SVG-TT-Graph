@@ -3,14 +3,11 @@ package SVG::TT::Graph::Line;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.04';
+$VERSION = '0.06';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
 
-# Nasty global! to store the template in, someone patch
-# please, so that reading from __DATA__ works even if you
-# do it twice from the same script!
 my $template;
 
 =head1 NAME
@@ -41,7 +38,7 @@ SVG::TT::Graph::Line - Create presentation quality SVG line graphs easily
 	'title' => 'Sales 2003',
   });
   
-  print "Content-type: image/svg+xml\r\n";
+  print "Content-type: image/svg+xml\r\n\r\n";
   print $graph->burn();
 
 =head1 DESCRIPTION
@@ -73,25 +70,30 @@ title, subtitle etc.
     'show_data_values'  => 1,
     'stacked'           => 0,
 
-    'scale_divisions'          => '20',
     'min_scale_value'           => '0',
     'area_fill'         => 0,
     'show_x_labels'     => 1,
     'stagger_x_labels'  => 0,
+    'rotate_x_labels'   => 0,
     'show_y_labels'     => 1,
-
+    'scale_integers'    => 0,
+    'scale_divisions'          => '20',
+	
     'show_x_title'      => 0,
     'x_title'           => 'X Field names',
 
     'show_y_title'      => 0,
+    'y_title_text_direction' => 'bt',
     'y_title'           => 'Y Scale',
 
     'show_graph_title'      => 0,
     'graph_title'           => 'Graph Title',
     'show_graph_subtitle'   => 0,
     'graph_subtitle'        => 'Graph Sub Title',
+    'key'                   => 0,
+    'key_position'          => 'right',
 
-    # Optional - defaults to using embeded stylesheet
+    # Optional - defaults to using internal stylesheet
     'style_sheet'       => '/includes/graph.css',
   });
 
@@ -155,10 +157,10 @@ scales to fix the space.
 =item style_sheet()
 
 Set the path to an external stylesheet, set to '' if
-you want to revert back to using the defaut embeded version.
+you want to revert back to using the defaut internal version.
 
 To create an external stylesheet create a graph using the
-default embeded version and copy the stylesheet section to
+default internal version and copy the stylesheet section to
 an external file and edit from there.
 
 =item show_data_values()
@@ -179,14 +181,6 @@ Accumulates each data set. (i.e. Each point increased by sum of all previous ser
 The point at which the Y axis starts, defaults to '0',
 if set to '' it will default to the minimum data value.
 
-=item scale_divisions()
-
-This defines the gap between markers on the Y axis,
-default is a 10th of the max_value, e.g. you will have
-10 markers on the Y axis. NOTE: do not set this too
-low - you are limited to 999 markers, after that the
-graph won't generate.
-
 =item show_x_labels()
 
 Whether to show labels on the X axis or not, defaults
@@ -197,10 +191,29 @@ to 1, set to '0' if you want to turn them off.
 Whether to show labels on the Y axis or not, defaults
 to 1, set to '0' if you want to turn them off.
 
+=item scale_integers()
+
+Ensures only whole numbers are used as the scale divisions.
+Default it '0', to turn on set to '1'. This has no effect if 
+scale divisions are less than 1.
+
+=item scale_divisions()
+
+This defines the gap between markers on the Y axis,
+default is a 10th of the max_value, e.g. you will have
+10 markers on the Y axis. NOTE: do not set this too
+low - you are limited to 999 markers, after that the
+graph won't generate.
+
 =item stagger_x_labels()
 
 This puts the labels at alternative levels so if they
 are long field names they will not overlap so easily.
+Default it '0', to turn on set to '1'.
+
+=item rotate_x_labels()
+
+This turns the X axis labels by 90 degrees.
 Default it '0', to turn on set to '1'.
 
 =item show_x_title()
@@ -216,6 +229,11 @@ What the title under X axis should be, e.g. 'Months'.
 
 Whether to show the title under the Y axis labels,
 default is 0, set to '1' to show.
+
+=item y_title_text_direction()
+
+Aligns writing mode for Y axis label. Defaults to 'bt' (Bottom to Top).
+Change to 'tb' (Top to Bottom) to reverse.
 
 =item y_title()
 
@@ -281,7 +299,9 @@ Leo Lapworth (LLAP@cuckoo.org)
 L<SVG::TT::Graph>,
 L<SVG::TT::Graph::Bar>,
 L<SVG::TT::Graph::BarHorizontal>,
+L<SVG::TT::Graph::BarLine>,
 L<SVG::TT::Graph::Pie>,
+L<SVG::TT::Graph::TimeSeries>
 
 =cut
 
@@ -314,17 +334,20 @@ sub _set_defaults {
 	    'show_data_values'  => 1,
 		'stacked'           => 0,
 	
-		'scale_divisions'   => '',
 	    'min_scale_value'           => '0',
 	    'area_fill'         => 0,
 	    'show_x_labels'     => 1,
 		'stagger_x_labels'	=> 0,
+        'rotate_x_labels'   => 0,
 	    'show_y_labels'     => 1,
-	
+		'scale_integers'	=> 0,
+		'scale_divisions'   => '',
+			
 	    'show_x_title'      => 0,
 	    'x_title'           => 'X Field names',
 	
 	    'show_y_title'      => 0,
+        'y_title_text_direction' => 'bt',
 	    'y_title'           => 'Y Scale',
 	
 	    'show_graph_title'		=> 0,
@@ -366,6 +389,7 @@ __DATA__
 <defs>
 <style type="text/css">
 <![CDATA[
+/* Copy from here for external style sheet */
 .svgBackground{
 	fill:#ffffff;
 }
@@ -426,8 +450,6 @@ __DATA__
 
 .yAxisTitle{
 	fill: #ff0000;
-	writing-mode: tb; 
-	glyph-orientation-vertical: 0;
 	text-anchor: middle;
 	font-size: 14px;
 	font-family: "Arial", sans-serif;
@@ -497,6 +519,16 @@ __DATA__
 	fill-opacity: 0.2;
 	stroke: none;
 }
+.fill11{
+	fill: #339900;
+	fill-opacity: 0.2;
+	stroke: none;
+}
+.fill12{
+	fill: #9966FF;
+	fill-opacity: 0.2;
+	stroke: none;
+}
 /* default line styles */
 .line1{
 	fill: none;
@@ -548,7 +580,16 @@ __DATA__
 	stroke: #663399;
 	stroke-width: 1px;	
 }
-
+.line11{
+	fill: none;
+	stroke: #339900;
+	stroke-width: 1px;	
+}
+.line12{
+	fill: none;
+	stroke: #9966FF;
+	stroke-width: 1px;	
+}
 /* default line styles */
 .key1,.dataPoint1{
 	fill: #ff0000;
@@ -600,6 +641,16 @@ __DATA__
 	stroke: none;
 	stroke-width: 1px;	
 }
+.key11,.dataPoint11{
+	fill: #339900;
+	stroke: none;
+	stroke-width: 1px;	
+}
+.key12,.dataPoint12{
+	fill: #9966FF;
+	stroke: none;
+	stroke-width: 1px;	
+}
 .keyText{
 	fill: #000000;
 	text-anchor:start;
@@ -607,6 +658,7 @@ __DATA__
 	font-family: "Arial", sans-serif;
 	font-weight: normal;
 }
+/* End copy for external style sheet */
 ]]>
 </style>
 </defs>
@@ -625,6 +677,7 @@ __DATA__
 	[% y = 0 %]
 	
 	[% char_width = 9 %]
+	[% half_char_height = 2.5 %]
 
     [% IF config.stacked %]
 <!-- pre-stack the data -->    
@@ -643,25 +696,39 @@ __DATA__
 	[% min_value = 99999999999 %]
 	[% max_value = 0 %]
 	[% max_key_size = 0 %]
+	[% max_x_label_size = 0 %]
+	<!-- find largest labels -->
 	[% FOREACH field = config.fields %]
+			[% IF max_x_label_size < field.length %]
+				[% max_x_label_size = field.length %]
+			[% END %]
+			
 		[% FOREACH dataset = data %]
 			[% IF min_value > dataset.data.$field && dataset.data.$field != '' %]
 				[% min_value = dataset.data.$field %]
 			[% END %]
+			
 			[% IF max_value < dataset.data.$field && dataset.data.$field != '' %]
 				[% max_value = dataset.data.$field %]
 			[% END %]
-		<!-- find largest dataset title for Key size -->
+
 			[% IF max_key_size < dataset.title.length %]
 				[% max_key_size = dataset.title.length %]
 			[% END %]
-		[% END %]
+			[% END %]
 	[% END %]
 	
 
 <!-- CALC HEIGHT AND Y COORD DIMENSIONS -->
 	<!-- reduce height of graph area if there is labelling on x axis -->
 	[% IF config.show_x_labels %][% h = h - 20 %][% END %]
+	
+	<!-- reduce height if x labels are rotated -->
+	[% max_x_label_length = 0 %]
+	[% IF config.rotate_x_labels %]
+		[% max_x_label_length = max_x_label_size * char_width %]
+		[% h = h - max_x_label_length %]
+	[% END %]
 	
 	<!-- stagger x labels if overlapping occurs -->
 	[% stagger = 0 %]
@@ -718,9 +785,17 @@ __DATA__
 	[% IF config.scale_divisions %]
 		[% scale_division = config.scale_divisions %]
 	[% ELSE %]
-		[% scale_division = scale_range / 10 FILTER format('%2.0f') %]
+		[% scale_division = scale_range / 10 FILTER format('%2.01f') %]
 	[% END %]
 
+	[% IF config.scale_integers %]
+		[% IF scale_division < 1 %]
+			[% scale_division = 1 %]
+		[% ELSIF scale_division.match('.') %]
+			[% scale_division = scale_division FILTER format('%2.0f') %]
+		[% END %]
+	[% END %]
+	
 	<!-- find the string length of max value -->
 	[% max_value_length = max_value.length %]
 	
@@ -777,14 +852,14 @@ __DATA__
 	<path d="M[% x %] [% base_line %] h[% w %]" class="axis" id="yAxis"/>
 
 <!-- //////////////////////////////  AXIS DISTRIBUTIONS //////////////////////////// -->
-	<!-- get number of data points on x scale -->
-	[% dx = config.fields.size %]
-		<!-- ensure x_data_points butt up to edge of graph -->
-		[% dx = dx - 1 %]
+<!-- get number of data points on x scale -->
+[% dx = config.fields.size %]
+<!-- ensure x_data_points butt up to edge of graph -->
+[% dx = dx - 1 %]
 
 <!-- get distribution width on x axis -->
 [% data_widths_x = w / dx %]
-[% dw = data_widths_x.match('(\d+[\.\d\d])').0 %]
+[% dw = data_widths_x FILTER format('%2.02f') %]
 
 [% i = dw %]
 [% count = 0 %]
@@ -794,23 +869,23 @@ __DATA__
 [% IF config.show_x_labels %]
 	[% FOREACH field = config.fields %]
 		[% IF count == 0 %]
-<text x="[% x %]" y="[% base_line + 15 %]" class="xAxisLabels">[% field %]</text>
+<text x="[% x %]" y="[% base_line + 15 %]" [% IF config.rotate_x_labels %]transform="rotate(90 [% x  - half_char_height %] [% base_line + 15 %])" style="text-anchor: start" [% END %]class="xAxisLabels">[% field %]</text>
 		[% i = i - dw %]
 		[% ELSE %]
 			[% IF stagger_count == 2 %]
-				<text x="[% x + i %]" y="[% base_line + 15 %]" class="xAxisLabels">[% field %]</text>
+				<text x="[% x + i %]" y="[% base_line + 15 %]" [% IF config.rotate_x_labels %]transform="rotate(90 [% x + i  - half_char_height %] [% base_line + 15 %])" style="text-anchor: start" [% END %]class="xAxisLabels">[% field %]</text>
 				[% stagger_count = 0 %]
 			[% ELSE %]
-				<text x="[% x + i %]" y="[% base_line + 15 + stagger %]" class="xAxisLabels">[% field %]</text>
+				<text x="[% x + i %]" y="[% base_line + 15 + stagger %]" [% IF config.rotate_x_labels %]transform="rotate(90 [% x + i - half_char_height %] [% base_line + 15 + stagger %])" style="text-anchor: start" [% END %]class="xAxisLabels">[% field %]</text>
 				<path d="M[% x + i %] [% base_line %], v[% stagger %]" class="staggerGuideLine" />
 			[% END %]
-
 		[% END %]
 	[% i = i + dw %]
 	[% count = count + 1 %]
 	[% stagger_count = stagger_count + 1 %]
 	[% END %]
 [% END %]
+
 
 <!-- distribute Y scale -->
 [% dy = scale_range / scale_division %]
@@ -822,7 +897,7 @@ __DATA__
 [% IF config.show_y_labels %]
 	[% WHILE (dy * count) < h %]
 		[% IF count == 0 %]
-			<!-- no stroke for first line -->
+		<!-- no stroke for first line -->
 			<text x="[% x - 5 %]" y="[% base_line - (dy * count) %]" class="yAxisLabels">[% y_value %]</text>
 		[% ELSE %]
 			<text x="[% x - 5 %]" y="[% base_line - (dy * count) %]" class="yAxisLabels">[% y_value %]</text>
@@ -833,6 +908,8 @@ __DATA__
 	[% END %]
 [% END %]
 
+
+
 <!-- //////////////////////////////  AXIS TITLES ////////////////////////////// -->
 
 <!-- x axis title -->
@@ -842,12 +919,16 @@ __DATA__
 		[% ELSE %]
 			[% y_xtitle = 35 %]
 		[% END %]
-		<text x="[% (w / 2) + x %]" y="[% h + y + y_xtitle + stagger %]" class="xAxisTitle">[% config.x_title %]</text>
+		<text x="[% (w / 2) + x %]" y="[% h + y + y_xtitle + stagger + max_x_label_length %]" class="xAxisTitle">[% config.x_title %]</text>
 	[% END %]	
 
 <!-- y axis title -->
 	[% IF config.show_y_title %]
-			<text x="10" y="[% (h / 2) + y %]" class="yAxisTitle">[% config.y_title %]</text>
+		[% IF config.y_title_text_direction == 'tb' %]
+			<text x="11" y="[% (h / 2) + y %]" class="yAxisTitle" style="writing-mode:tb;">[% config.y_title %]</text>
+		[% ELSE %]
+			<text class="yAxisTitle" transform="translate(15,[% (h / 2) + y %]) rotate(270)">[% config.y_title %]</text>
+		[% END %]
 	[% END %]
 
 
@@ -909,8 +990,13 @@ __DATA__
 [% ELSIF config.key && config.key_position == 'bottom' %]
 	<!-- calc y position of start of key -->
 	[% y_key = base_line %]
-	[% IF config.show_x_labels %][% y_key = base_line + 20 %][% END %]
-	[% IF config.show_x_title %][% y_key = base_line + 25 %][% END %]
+	[% IF config.show_x_title %][% y_key = y_key + 25 %][% END %]
+	[% IF config.rotate_x_labels && config.show_x_labels %]
+		[% y_key = y_key + max_x_label_length %]
+	[% ELSIF config.show_x_labels && stagger < 1 %]
+		[% y_key = y_key + 20 %]
+	[% END %]
+	
 	[% y_key_start = y_key %]
 	[% x_key = x %]
 	[% FOREACH dataset = data %]
@@ -919,9 +1005,9 @@ __DATA__
 			[% x_key = x_key + 200 %]
 			[% y_key = y_key - (key_box_size * 4) - 2 %]
 		[% END %]
-		<rect x="[% x_key %]" y="[% y_key + (key_box_size * key_count) + (key_count * key_padding) + stagger %]" width="[% key_box_size %]" height="[% key_box_size %]" class="key[% key_count %]"/>
-
-		<text x="[% x_key + key_box_size + key_padding %]" y="[% y_key + (key_box_size * key_count) + (key_count * key_padding) + key_box_size + stagger %]" class="keyText">[% dataset.title %]</text>
+			<rect x="[% x_key %]" y="[% y_key + (key_box_size * key_count) + (key_count * key_padding) + stagger %]" width="[% key_box_size %]" height="[% key_box_size %]" class="key[% key_count %]"/>
+		
+			<text x="[% x_key + key_box_size + key_padding %]" y="[% y_key + (key_box_size * key_count) + (key_count * key_padding) + key_box_size + stagger %]" class="keyText">[% dataset.title %]</text>
 		[% key_count = key_count + 1 %]
 	[% END %]
 	

@@ -1,5 +1,43 @@
 Revision history for Perl extension SVG::TT::Graph.
 
+TODO - probably!
+	- max_scale_value
+	- format of scale & data values (e.g. £ 34,333.32)
+	- extra padding on right for long x labels
+	- Fix bug when text hides in pie chart if opacity off
+
+0.06
+	- Put in comment so people know where to copy the
+	  style sheet from (e.g. not including the <style> or CDATA)
+
+0.05 (dev)
+	David Meibusch changes:
+	- Calls calculations() prior to burn if available
+	- 'calc' now passed to template if available
+	- _range_calc has moved from TimeSeries.pm to Graph.pm
+
+	TimeSeries:
+	- rollover_values
+	- data_value_format
+	- max_time_span
+	- y_label_format
+	- rotate_x_labels
+
+	Other changes:
+	- Renamed README to INSTALL
+	- rotate_x_labels added
+	- y_title_text_direction added
+	- scale_integers added
+	- Minor doc patch "\r\n" to "\r\n\r\n"
+	- Stylesheet presets increased (from 10) to support 12 datasets
+	- Bug fix regarding show_data_values with Bar
+	- Bug fix with scales of values under 5
+	- Added BarLine as a graph module
+	- Added TimeSeries as a graph module - by David
+	- Added Prereq of 'DateTime' - lots of modules but
+	  don't think it's bad to encourage people to use it
+	- Altered style sheet from fill-opacity: 0.2; to fill-opacity: 0.5;
+	  
 0.04 Wed Sept 24 2003
 	- Patch from David Meibusch for Pie if slice > 50%
 	- Patch from David Meibusch for Line to add 'stacked' option

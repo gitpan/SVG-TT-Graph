@@ -4,8 +4,9 @@ use strict;
 use Carp;
 use vars qw($VERSION $AUTOLOAD);
 use Template;
+use POSIX;
 
-$VERSION = '0.04';
+$VERSION = '0.06';
 
 # set up TT object
 my %config = (
@@ -76,6 +77,11 @@ SVG::TT::Graph - Base object for generating SVG Graphs
   my $config_value = $graph->config_option();
   # set a config option value
   $graph->config_option($config_value);
+  
+  # All graphs support SVGZ (compressed SVG) if 
+  # Compress::Zlib is available.
+  # either 'compress' => 1 config option, or
+  $graph->compress(1);
     
   print "Content-type: image/svg+xml\r\n";
   print $graph->burn();
@@ -188,7 +194,10 @@ sub burn {
 	
 	# Check we have at least one data value
 	croak "No data available" 
-		unless scalar(@{$self->{'data'}}) > 0;	
+		unless scalar(@{$self->{'data'}}) > 0;
+        
+    # perform any calculations prior to burn
+    $self->calculations() if $self->can('calculations');
 
 	croak ref($self) . ' must have a get_template method.' 
 		unless $self->can('get_template');
@@ -196,8 +205,9 @@ sub burn {
 	my $template = $self->get_template();
 	
 	my %vals = (
-		'data'		=> $self->{'data'},
-		'config'	=> $self->{'config'},
+		'data'		=> $self->{'data'},     # the data
+		'config'	=> $self->{'config'},   # the configuration
+        'calc'      => $self->{'calc'},     # the calculated values
 		'sin'		=> \&_sin_it,
 		'cos'		=> \&_cos_it,
 	);
@@ -205,7 +215,7 @@ sub burn {
 	# euu - hack!! - maybe should just be a method 
 	$self->{sin} = \&_sin_it;
 	$self->{cos} = \&_cos_it;
-	
+    
 	my $file;
 	my $template_responce = $tt->process( \$template, \%vals, \$file );
 
@@ -213,6 +223,17 @@ sub burn {
 #		require Data::Dumper;
 		croak "Template error: " . $tt->error . "\n" if $tt->error;
 	}
+    
+    # compress if required
+    if ($self->{config}->{compress}) {
+        if (eval "require Compress::Zlib") {
+            return Compress::Zlib::memGzip($file) ; 
+            
+        } else {
+            $file .= "<!-- Compress::Zlib not available for SVGZ:$@ -->";
+        }        
+    }
+    
 	return $file;
 }
 
@@ -222,6 +243,74 @@ sub _sin_it {
 
 sub _cos_it {
 	return cos(shift);
+}
+
+# Calculate a scaling range and divisions to be aesthetically pleasing
+# Parameters:
+#   value range
+# Returns
+#   (revised range, division size, division precision)
+sub _range_calc () {
+    my $self = shift;
+    my $range = shift;
+
+    my ($max,$division);
+    my $count = 0;
+    my $value = $range;
+    
+    if ($value == 0) {
+        # Can't do much really
+        $division = 0.2;    
+        $max = 1;
+        return ($max,$division,1);
+    }
+    
+    if ($value < 1) {
+        while ($value < 1) {
+            $value *= 10;
+            $count++;
+        }
+        $division = 1;
+        while ($count--) {
+            $division /= 10;
+        }
+        $max = ceil($range / $division) * $division;
+    }
+    else {
+        while ($value > 10) {
+            $value /= 10;
+            $count++;
+        }
+        $division = 1;
+        while ($count--) {
+            $division *= 10;
+        }
+        $max = ceil($range / $division) * $division;
+    }
+    
+    if (int($max / $division) <= 2) {
+        $division /= 5;
+        $max = ceil($range / $division) * $division;
+    }
+    elsif (int($max / $division) <= 5) {
+        $division /= 2;
+        $max = ceil($range / $division) * $division;
+    }
+    
+    if ($division >= 1) {
+        $count = 0;  
+    }
+    else {
+        $count = length($division) - 2;
+    }
+
+    return ($max,$division,$count);
+}
+
+# Returns true if config value exists, is defined and not ''
+sub _is_valid_config() { 
+    my ($self,$name) = @_;
+    return ((exists $self->{config}->{$name}) && (defined $self->{config}->{$name}) && ($self->{config}->{$name} ne ''));
 }
 
 =head2 config methods
@@ -265,8 +354,7 @@ __END__
 
 =head1 EXAMPLES
 
-For examples look at the project home page 
-http://leo.cuckoo.org/projects/SVG-TT-Graph/
+For examples look at the project home page http://leo.cuckoo.org/projects/SVG-TT-Graph/
 
 =head1 EXPORT
 
@@ -275,6 +363,8 @@ None by default.
 =head1 ACKNOWLEDGEMENTS
 
 Thanks to Foxtons for letting us put this on CPAN.
+Todd Caine for heads up on reparsing the template (but not using atm)
+David Meibusch for TimeSeries and a load of other ideas
 
 =head1 AUTHOR
 
@@ -283,8 +373,12 @@ Leo Lapworth (LLAP@cuckoo.org) and Stephen Morgan (TT and SVG)
 =head1 SEE ALSO
 
 L<SVG::TT::Graph::Line>,
+L<SVG::TT::Graph::Bar>,
 L<SVG::TT::Graph::BarHorizontal>,
+L<SVG::TT::Graph::BarLine>,
 L<SVG::TT::Graph::Pie>,
+L<SVG::TT::Graph::TimeSeries>,
+L<Compress::Zlib>,
 
 =head1 COPYRIGHT
 

@@ -74,6 +74,8 @@ sub run_bar {
 	
 	    'show_x_labels'     => 1,
 	    'show_y_labels'     => 1,
+		'rotate_x_labels'	=> 1,
+		'key'				=> 0,
 	
 	    'show_x_title'      => 1,
 	    'x_title'           => 'Field names',

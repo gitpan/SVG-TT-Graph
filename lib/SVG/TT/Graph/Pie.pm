@@ -3,14 +3,11 @@ package SVG::TT::Graph::Pie;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.04';
+$VERSION = '0.06';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
 
-# Nasty global! to store the template in, someone patch
-# please, so that reading from __DATA__ works even if you
-# do it twice from the same script!
 my $template;
 
 =head1 NAME
@@ -35,7 +32,7 @@ SVG::TT::Graph::Pie - Create presentation quality SVG pie graphs easily
 	'title' => 'Sales 2002',
   });
   
-  print "Content-type: image/svg+xml\r\n";
+  print "Content-type: image/svg+xml\r\n\r\n";
   print $graph->burn();
 
 =head1 DESCRIPTION
@@ -88,7 +85,7 @@ title, subtitle etc.
     'expanded'              => 0,
     'expand_greatest'       => 0,
 
-    # Optional - defaults to using embeded stylesheet
+    # Optional - defaults to using internal stylesheet
     'style_sheet'       => '/includes/graph.css',
 
   });
@@ -96,7 +93,7 @@ title, subtitle etc.
 The constructor takes a hash reference, fields (the name for each
 slice on the pie) MUST be set, all other values are defaulted to those
 shown above - with the exception of style_sheet which defaults
-to using the embeded style sheet.
+to using the internal style sheet.
 
 =head2 add_data()
 
@@ -146,17 +143,17 @@ scales to fix the space.
 
 =item width()
 
-Set the width of the graph box, this is the total height
+Set the width of the graph box, this is the total width
 of the SVG box created - not the graph it self which auto
 scales to fix the space.
 
 =item style_sheet()
 
 Set the path to an external stylesheet, set to '' if
-you want to revert back to using the defaut embeded version.
+you want to revert back to using the defaut internal version.
 
 To create an external stylesheet create a graph using the
-default embeded version and copy the stylesheet section to
+default internal version and copy the stylesheet section to
 an external file and edit from there.
 
 =item show_graph_title()
@@ -278,9 +275,11 @@ Leo Lapworth (LLAP@cuckoo.org)
 =head1 SEE ALSO
 
 L<SVG::TT::Graph>,
+L<SVG::TT::Graph::Line>,
 L<SVG::TT::Graph::Bar>,
 L<SVG::TT::Graph::BarHorizontal>,
-L<SVG::TT::Graph::Line>,
+L<SVG::TT::Graph::BarLine>,
+L<SVG::TT::Graph::TimeSeries>
 
 =cut
 
@@ -369,7 +368,7 @@ __DATA__
 <!-- include default stylesheet if none specified -->
 <style type="text/css">
 <![CDATA[
-
+/* Copy from here for external style sheet */
 .svgBackground{
 	fill:none;
 }
@@ -482,6 +481,7 @@ __DATA__
 	font-family: "Arial", sans-serif;
 	font-weight: normal;
 }
+/* End copy for external style sheet */
 ]]>
 </style>
 [% END %]
@@ -584,7 +584,6 @@ __DATA__
 
 <!-- if chart expanded -->
 [% IF config.expanded OR config.expand_greatest %]
-	<!-- HERE -->
 	[% e = 10 %]
 [% ELSE %]
 	[% e = 0 %]
@@ -601,7 +600,7 @@ __DATA__
 	
 	[% IF !config.expanded && !config.expand_greatest %]
 	<!-- only show shadow if not expanded -->
-<circle cx="[% x + config.shadow_depth %]" cy="[% y + config.shadow_depth %]" r="[% shadow_size + e %]" style="fill: url(#shadow); stroke: none;"/>
+<circle cx="[% x + config.shadow_offset %]" cy="[% y + config.shadow_offset %]" r="[% shadow_size + e %]" style="fill: url(#shadow); stroke: none;"/>
 	[% END %]
 	
 [% END %]
@@ -664,7 +663,7 @@ __DATA__
 		[% ye = re * sin(radians_half) FILTER format('%02.10f') %]
 
         <path d="M[% px_start + xe %] [% pmin_scale_value + ye %] A[% r %] [% r %], 0, 
-        [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end + xe %] [% y + py_end + ye %] L[% x + xe %] [% y + ye %], Z" class="fill[% count %]"/>
+        [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end + xe %] [% y + py_end + ye %] L[% x + xe %] [% y + ye %], Z" class="dataPoint[% count %]"/>
 	
 	[% ELSIF !config.expanded && config.expand_greatest %]
 		[% IF data.0.data.$field == max_value %]
@@ -672,15 +671,15 @@ __DATA__
 		    [% xe = re * cos(radians_half) FILTER format('%02.10f') %]
 		    [% ye = re * sin(radians_half) FILTER format('%02.10f') %]
 		    <path d="M[% px_start + xe %] [% pmin_scale_value + ye %] A[% r %] [% r %], 0, 
-            [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end + xe %] [% y + py_end + ye %] L[% x + xe %] [% y + ye %], Z" class="fill[% count %]"/>
+            [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end + xe %] [% y + py_end + ye %] L[% x + xe %] [% y + ye %], Z" class="dataPoint[% count %]"/>
 		[% ELSE %]
 			<path d="M[% px_start %] [% pmin_scale_value %] A[% r %] [% r %], 0, 
-            [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end %] [% y + py_end %] L[% x %] [% y %], Z" class="fill[% count %]"/>    
+            [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end %] [% y + py_end %] L[% x %] [% y %], Z" class="dataPoint[% count %]"/>    
 		[% END %]
 	
 	[% ELSE %]
 		<path d="M[% px_start %] [% pmin_scale_value %] A[% r %] [% r %], 0, 
-        [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end %] [% y + py_end %] L[% x %] [% y %], Z" class="fill[% count %]"/>    
+        [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end %] [% y + py_end %] L[% x %] [% y %], Z" class="dataPoint[% count %]"/>    
 	[% END %]
 	
 	

@@ -3,13 +3,14 @@ use lib qw( ./blib/lib ../blib/lib );
 # Check we can create objects and adding data works
 # as well as clearing data.
 
-use Test::More tests => 45;
+use Test::More tests => 56;
 
 BEGIN { use_ok( 'SVG::TT::Graph' ); }
 BEGIN { use_ok( 'SVG::TT::Graph::Pie' ); }
 BEGIN { use_ok( 'SVG::TT::Graph::Line' ); }
 BEGIN { use_ok( 'SVG::TT::Graph::Bar' ); }
 BEGIN { use_ok( 'SVG::TT::Graph::BarHorizontal' ); }
+BEGIN { use_ok( 'SVG::TT::Graph::BarLine' ); }
 
 my @fields = qw(Jan Feb Mar);
 my @data_sales_02 = qw(12 45 21);
@@ -17,7 +18,7 @@ my @data_sales_03 = qw(24 55 61);
 
 # Might as well test them all, even though they're
 # the same under the hood! - just in case
-my @types = qw(Line Bar BarHorizontal Pie);
+my @types = qw(Line Bar BarHorizontal Pie BarLine);
 
 foreach my $type (@types) {
 	my $module = "SVG::TT::Graph::$type";

@@ -3,14 +3,11 @@ package SVG::TT::Graph::BarHorizontal;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.04';
+$VERSION = '0.06';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
 
-# Nasty global! to store the template in, someone patch
-# please, so that reading from __DATA__ works even if you
-# do it twice from the same script!
 my $template;
 
 =head1 NAME
@@ -35,7 +32,7 @@ SVG::TT::Graph::BarHorizontal - Create presentation quality SVG horitonzal bar g
 	'title' => 'Sales 2002',
   });
   
-  print "Content-type: image/svg+xml\r\n";
+  print "Content-type: image/svg+xml\r\n\r\n";
   print $graph->burn();
 
 =head1 DESCRIPTION
@@ -73,19 +70,23 @@ title, subtitle etc.
     'show_x_labels'     => 1,
     'stagger_x_labels'  => 0,
 	'show_y_labels'     => 1,
+    'scale_integers'    => 0,
 
     'show_x_title'      => 0,
     'x_title'           => 'X Field names',
 
     'show_y_title'      => 0,
+    'y_title_text_direction' => 'bt',
     'y_title'           => 'Y Scale',
 
     'show_graph_title'		=> 0,
     'graph_title'           => 'Graph Title',
     'show_graph_subtitle'	=> 0,
     'graph_subtitle'		=> 'Graph Sub Title',
+    'key'                   => 0,
+    'key_position'          => 'right',
 
-    # Optional - defaults to using embeded stylesheet
+    # Optional - defaults to using internal stylesheet
     'style_sheet'       => '/includes/graph.css',
   });
 
@@ -144,17 +145,17 @@ scales to fix the space.
 
 =item width()
 
-Set the width of the graph box, this is the total height
+Set the width of the graph box, this is the total width
 of the SVG box created - not the graph it self which auto
 scales to fix the space.
 
 =item style_sheet()
 
 Set the path to an external stylesheet, set to '' if
-you want to revert back to using the defaut embeded version.
+you want to revert back to using the defaut internal version.
 
 To create an external stylesheet create a graph using the
-default embeded version and copy the stylesheet section to
+default internal version and copy the stylesheet section to
 an external file and edit from there.
 
 =item show_data_values()
@@ -170,14 +171,6 @@ is '1', set to '0' if you don't want gaps.
 
 The point at which the Y axis starts, defaults to '0',
 if set to '' it will default to the minimum data value.
-
-=item scale_divisions()
-
-This defines the gap between markers on the X axis,
-default is a 10th of the max_value, e.g. you will have
-10 markers on the X axis. NOTE: do not set this too
-low - you are limited to 999 markers, after that the
-graph won't generate.
 
 =item show_x_labels()
 
@@ -195,6 +188,20 @@ Default it '0', to turn on set to '1'.
 Whether to show labels on the Y axis or not, defaults
 to 1, set to '0' if you want to turn them off.
 
+=item scale_integers()
+
+Ensures only whole numbers are used as the scale divisions.
+Default it '0', to turn on set to '1'. This has no effect if 
+scale divisions are less than 1.
+
+=item scale_divisions()
+
+This defines the gap between markers on the X axis,
+default is a 10th of the max_value, e.g. you will have
+10 markers on the X axis. NOTE: do not set this too
+low - you are limited to 999 markers, after that the
+graph won't generate.
+
 =item show_x_title()
 
 Whether to show the title under the X axis labels,
@@ -208,6 +215,11 @@ What the title under X axis should be, e.g. 'Months'.
 
 Whether to show the title under the Y axis labels,
 default is 0, set to '1' to show.
+
+=item y_title_text_direction()
+
+Aligns writing mode for Y axis label. Defaults to 'bt' (Bottom to Top).
+Change to 'tb' (Top to Bottom) to reverse.
 
 =item y_title()
 
@@ -245,10 +257,10 @@ Where the key should be positioned, defaults to
 
 =head1 NOTES
 
-The default stylesheet handles upto 10 data sets, if you
+The default stylesheet handles upto 12 data sets, if you
 use more you must create your own stylesheet and add the
 additional settings for the extra data sets. You will know
-if you go over 10 data sets as they will have no style and
+if you go over 12 data sets as they will have no style and
 be in black.
 
 =head1 EXAMPLES
@@ -273,8 +285,9 @@ Leo Lapworth (LLAP@cuckoo.org)
 L<SVG::TT::Graph>,
 L<SVG::TT::Graph::Line>,
 L<SVG::TT::Graph::Bar>,
+L<SVG::TT::Graph::BarLine>,
 L<SVG::TT::Graph::Pie>,
-
+L<SVG::TT::Graph::TimeSeries>
 
 =cut
 
@@ -313,11 +326,13 @@ sub _set_defaults {
 	    'show_x_labels'     => 1,
 		'stagger_x_labels'  => 0,
 	    'show_y_labels'     => 1,
+	    'scale_integers'    => 0,
 	
 	    'show_x_title'      => 0,
 	    'x_title'           => 'X Field names',
 	
 	    'show_y_title'      => 0,
+        'y_title_text_direction' => 'bt',
 	    'y_title'           => 'Y Scale',
 	
 	    'show_graph_title'		=> 0,
@@ -356,6 +371,7 @@ __DATA__
 <defs>
 <style type="text/css">
 <![CDATA[
+/* Copy from here for external style sheet */
 .svgBackground{
 	fill:#ffffff;
 	/* set 'fill: none;' and then include 'wmode="transparent"'
@@ -418,8 +434,6 @@ __DATA__
 
 .yAxisTitle{
 	fill: #ff0000;
-	writing-mode: tb; 
-	glyph-orientation-vertical: 0;
 	text-anchor: middle;
 	font-size: 14px;
 	font-family: "Arial", sans-serif;
@@ -441,61 +455,73 @@ __DATA__
 /* default fill styles for multiple datasets (probably only use a single dataset on this graph though) */
 .key1,.fill1{
 	fill: #ff0000;
-	fill-opacity: 0.2;
+	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 0.5px;	
 }
 .key2,.fill2{
 	fill: #0000ff;
-	fill-opacity: 0.2;
+	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 1px;	
 }
 .key3,.fill3{
 	fill: #00ff00;
-	fill-opacity: 0.2;
+	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 1px;	
 }
 .key4,.fill4{
 	fill: #ffcc00;
-	fill-opacity: 0.2;
+	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 1px;	
 }
 .key5,.fill5{
 	fill: #00ccff;
-	fill-opacity: 0.2;
+	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 1px;	
 }
 .key6,.fill6{
 	fill: #ff00ff;
-	fill-opacity: 0.2;
+	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 1px;	
 }
 .key7,.fill7{
 	fill: #00ffff;
-	fill-opacity: 0.2;
+	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 1px;	
 }
 .key8,.fill8{
 	fill: #ffff00;
-	fill-opacity: 0.2;
+	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 1px;	
 }
 .key9,.fill9{
 	fill: #cc6666;
-	fill-opacity: 0.2;
+	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 1px;	
 }
 .key10,.fill10{
 	fill: #663399;
-	fill-opacity: 0.2;
+	fill-opacity: 0.5;
+	stroke: none;
+	stroke-width: 1px;	
+}
+.key11,.fill11{
+	fill: #339900;
+	fill-opacity: 0.5;
+	stroke: none;
+	stroke-width: 1px;	
+}
+.key12,.fill12{
+	fill: #9966FF;
+	fill-opacity: 0.5;
 	stroke: none;
 	stroke-width: 1px;	
 }
@@ -506,6 +532,7 @@ __DATA__
 	font-family: "Arial", sans-serif;
 	font-weight: normal;
 }
+/* End copy for external style sheet */
 ]]>
 </style>
 </defs>
@@ -535,11 +562,17 @@ __DATA__
 				[% max_ylabel_length = y_label.length %]
 			[% END %]
 		[% END %]
-		
+				
 		[% space_b4_axis = char_width * max_ylabel_length %]
 
 		[% w = w - space_b4_axis - char_width %]
 		[% x = x + space_b4_axis + char_width %]
+	[% END %]
+	
+	<!-- corrects space around graph when very small y labels are used -->
+	[% IF max_ylabel_length == 1 %]
+		[% w = w - 5 %]
+		[% x = x + 5 %]
 	[% END %]
 
 	<!-- pad ends of graph if there are x labels -->
@@ -589,10 +622,13 @@ __DATA__
 	
 <!-- reduce graph dimensions if there is a KEY -->
 	[% key_box_size = 12 %]
-	[% IF config.key && config.key_position == 'right' %]
-		[% w = w - (max_key_size * (char_width - 1)) - (key_box_size * 3 ) %]
+	[% IF config.key && config.key_position == 'right' %][% w = w - (max_key_size * (char_width - 1)) - (key_box_size * 3 ) %]
 	[% ELSIF config.key && config.key_position == 'bottom' %]
-		[% h = h - 50 %]
+        [% IF data.size < 4 %]
+            [% h = h - ((data.size + 1) * (key_box_size + key_padding))%]
+        [% ELSE %]
+            [% h = h - (4 * (key_box_size + key_padding))%]
+        [% END %]        
 	[% END %]
 
 
@@ -636,6 +672,13 @@ __DATA__
 		[% scale_division = scale_range / 10 %]
 	[% END %]
 	
+	[% IF config.scale_integers %]
+		[% IF scale_division < 1 %]
+			[% scale_division = 1 %]
+		[% ELSIF scale_division.match('.') %]
+			[% scale_division = scale_division FILTER format('%2.0f') %]
+		[% END %]
+	[% END %]
 	
 <!-- //////////////////////////////  BUILD GRAPH AREA ////////////////////////////// -->
 <!-- graph bg -->
@@ -686,11 +729,11 @@ __DATA__
 			<text x="[% x + (dx * count) %]" y="[% base_line + 15 %]" class="xAxisLabels">[% y_value FILTER format('%2.0f') %]</text>
 		[% ELSE %]
 			[% IF stagger_count == 2 %]
-				<text x="[% x + (dx * count) %]" y="[% base_line + 15 %]" class="xAxisLabels" style="text-anchor: middle;">[% y_value FILTER format('%2.0f') %]</text>
+				<text x="[% x + (dx * count) %]" y="[% base_line + 15 %]" class="xAxisLabels" style="text-anchor: middle;">[% y_value FILTER format('%2.01f') %]</text>
 				<path d="M[% x + (dx * count) %] [% base_line %] V[% y %]" class="guideLines"/>
 				[% stagger_count = 0 %]
 			[% ELSE %]
-				<text x="[% x + (dx * count) %]" y="[% base_line + 15 + stagger %]" class="xAxisLabels" style="text-anchor: middle;">[% y_value FILTER format('%2.0f') %]</text>
+				<text x="[% x + (dx * count) %]" y="[% base_line + 15 + stagger %]" class="xAxisLabels" style="text-anchor: middle;">[% y_value FILTER format('%2.01f') %]</text>
 				<path d="M[% x + (dx * count) %] [% base_line %] V[% y %]" class="guideLines"/>
 				<path d="M[% x + (dx * count) %] [% base_line %], v[% stagger %]" class="staggerGuideLine" />
 			[% END %]
@@ -718,7 +761,11 @@ __DATA__
 
 <!-- y axis title -->
 	[% IF config.show_y_title %]
-			<text x="10" y="[% (h / 2) + y %]" class="yAxisTitle">[% config.x_title %]</text>
+		[% IF config.y_title_text_direction == 'tb' %]
+			<text x="11" y="[% (h / 2) + y %]" class="yAxisTitle" style="writing-mode:tb;">[% config.y_title %]</text>
+		[% ELSE %]
+			<text class="yAxisTitle" transform="translate(15,[% (h / 2) + y %]) rotate(270)">[% config.y_title %]</text>
+		[% END %]
 	[% END %]
 
 
@@ -775,9 +822,9 @@ __DATA__
 			[% x_key = x_key + 200 %]
 			[% y_key = y_key - (key_box_size * 4) - 2 %]
 		[% END %]
-		<rect x="[% x_key %]" y="[% y_key + (key_box_size * key_count) + (key_count * key_padding) %]" width="[% key_box_size %]" height="[% key_box_size %]" class="key[% key_count %]"/>
+		<rect x="[% x_key %]" y="[% y_key + (key_box_size * key_count) + (key_count * key_padding) + stagger %]" width="[% key_box_size %]" height="[% key_box_size %]" class="key[% key_count %]"/>
 
-		<text x="[% x_key + key_box_size + key_padding %]" y="[% y_key + (key_box_size * key_count) + (key_count * key_padding) + key_box_size %]" class="keyText">[% dataset.title %]</text>
+		<text x="[% x_key + key_box_size + key_padding %]" y="[% y_key + (key_box_size * key_count) + (key_count * key_padding) + key_box_size + stagger %]" class="keyText">[% dataset.title %]</text>
 		[% key_count = key_count + 1 %]
 	[% END %]
 	
