@@ -1,5 +1,9 @@
 Revision history for Perl extension SVG::TT::Graph.
 
+0.04 Wed Sept 24 2003
+	- Patch from David Meibusch for Pie if slice > 50%
+	- Patch from David Meibusch for Line to add 'stacked' option
+
 0.03  Wed Aug 28 
 	- Doc fix thanks to Mike Castle
 	- Renaming (sorry, thought it best to do ASAP)

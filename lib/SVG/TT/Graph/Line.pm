@@ -3,7 +3,7 @@ package SVG::TT::Graph::Line;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
@@ -71,6 +71,7 @@ title, subtitle etc.
     'width'             => '300',
     'show_data_points'  => 1,
     'show_data_values'  => 1,
+    'stacked'           => 0,
 
     'scale_divisions'          => '20',
     'min_scale_value'           => '0',
@@ -168,6 +169,10 @@ Show the value of each element of data on the graph
 
 Show a small circle on the graph where the line
 goes from one point to the next.
+
+=item stacked()
+
+Accumulates each data set. (i.e. Each point increased by sum of all previous series at same point). Default is 0, set to '1' to show.
 
 =item min_scale_value()
 
@@ -307,6 +312,7 @@ sub _set_defaults {
 		'style_sheet'       => '',
 	    'show_data_points'  => 1,
 	    'show_data_values'  => 1,
+		'stacked'           => 0,
 	
 		'scale_divisions'   => '',
 	    'min_scale_value'           => '0',
@@ -620,6 +626,19 @@ __DATA__
 	
 	[% char_width = 9 %]
 
+    [% IF config.stacked %]
+<!-- pre-stack the data -->    
+        [% FOREACH field = config.fields %]
+            [% cumulative = 0 %]
+            [% FOREACH dataset = data %]
+                [% IF dataset.data.$field != '' %]
+                    [% cumulative = cumulative + dataset.data.$field %]
+                [% END %]
+                [% dataset.data.$field = cumulative %]
+            [% END %]
+        [% END %]
+    [% END %]
+
 <!-- calc min and max values -->
 	[% min_value = 99999999999 %]
 	[% max_value = 0 %]
@@ -638,9 +657,6 @@ __DATA__
 			[% END %]
 		[% END %]
 	[% END %]
-
-
-	
 	
 
 <!-- CALC HEIGHT AND Y COORD DIMENSIONS -->
@@ -667,9 +683,15 @@ __DATA__
 	
 <!-- reduce graph dimensions if there is a KEY -->
 	[% key_box_size = 12 %]
+    [% key_padding = 5 %]
 	
 	[% IF config.key && config.key_position == 'right' %][% w = w - (max_key_size * (char_width - 1)) - (key_box_size * 3 ) %]
-	[% ELSIF config.key && config.key_position == 'bottom' %][% h = h - 50 %]
+	[% ELSIF config.key && config.key_position == 'bottom' %]
+        [% IF data.size < 4 %]
+            [% h = h - ((data.size + 1) * (key_box_size + key_padding))%]
+        [% ELSE %]
+            [% h = h - (4 * (key_box_size + key_padding))%]
+        [% END %]        
 	[% END %]
 
 	<!-- find start value for scale on y axis -->
@@ -834,63 +856,50 @@ __DATA__
 <!-- //////////////////////////////  SHOW DATA ////////////////////////////// -->
 	
 [% divider = dy / scale_division %]
-<!-- data points on graph -->
-	[% IF config.show_data_points || config.show_data_values%]
-		[% xcount = 0 %]
-		
-		[% FOREACH field = config.fields %]
-		[% dcount = 1 %]
-			[% FOREACH dataset = data %]
-				[% IF config.show_data_points %]
-		<circle cx="[% (dw * xcount) + x %]" cy="[% base_line - (dataset.data.$field * divider) %]" r="2.5" class="dataPoint[% dcount %]"/>
-				[% END %]
-			
-			[% IF config.show_data_values %]
-		<text x="[% (dw * xcount) + x %]" y="[% base_line - (dataset.data.$field * divider) - 6 %]" class="dataPointLabel">[% dataset.data.$field %]</text>
-			[% END %]
-			[% dcount = dcount + 1 %]	
-		[% END %]
-			[% xcount = xcount + 1 %]		
-		[% END %]
-	[% END %]
+[% line = data.size %]
+[% FOREACH dataset = data.reverse %]
 
+    [% IF config.area_fill %]
+        <!--- create alternate fill first (so line can overwrite if necessary) -->
+        <path d="M[% x %] [% base_line %] L
+        [% xcount = 0 %]
+        [% FOREACH field = config.fields %]
+            [% (dw * xcount) + x %] [% base_line - (dataset.data.$field * divider) %],
+            [% xcount = xcount + 1 %]
+        [% END %]
+        [% (dw * (xcount - 1)) + x %] [% base_line %] Z" class="fill[% line %]"/>
+    [% END %]
 
-[% IF config.area_fill %]
-<!-- copy data line(s) (but close it) to give control of fill to css -->
-[% fill = 1 %]	
-[% FOREACH dataset = data %]
-	<path d="M[% x %] [% base_line %] 
-	L
-	[% xcount = 0 %]
-	[% FOREACH field = config.fields %]
-			[% (dw * xcount) + x %] [% base_line - (dataset.data.$field * divider) %],
-		[% xcount = xcount + 1 %]
-	[% END %]
-	[% w + x %] [% base_line %] Z" class="fill[% fill %]"/>
-[% fill = fill + 1 %]
+    <!--- create line -->
+    <path d="M
+    [% xcount = 0 %]
+    [% FOREACH field = config.fields %]
+        [% IF xcount == 1 %] L [% END %]
+        [% (dw * xcount) + x %] [% base_line - (dataset.data.$field * divider) %],
+        [% xcount = xcount + 1 %]       
+    [% END %]" class="line[% line %]"/>
+    
+    [% IF config.show_data_points || config.show_data_values%]
+        [% xcount = 0 %]
+        [% FOREACH field = config.fields %]
+            [% IF config.show_data_points %]
+                <!-- datapoint shown -->
+                <circle cx="[% (dw * xcount) + x %]" cy="[% base_line - (dataset.data.$field * divider) %]" r="2.5" class="dataPoint[% line %]"/>
+            [% END %]
+            
+            [% IF config.show_data_values %]
+                <!-- datavalue shown -->
+                <text x="[% (dw * xcount) + x %]" y="[% base_line - (dataset.data.$field * divider) - 6 %]" class="dataPointLabel">[% dataset.data.$field %]</text>
+            [% END %]
+            [% xcount = xcount + 1 %]       
+        [% END %]
+    [% END %]
+    
+    [% line = line - 1 %]
 [% END %]
-[% END %]
-
-<!-- join the dots (for each line if applicable)... -->
-[% line = 1 %]
-[% FOREACH dataset = data %]
-	<path d="M
-	[% xcount = 0 %]
-	[% FOREACH field = config.fields %]
-		[% IF xcount == 1 %]
-			L
-		[% END %]
-		[% (dw * xcount) + x %] [% base_line - (dataset.data.$field * divider) %],
-		[% xcount = xcount + 1 %]		
-	[% END %]" class="line[% line %]"/>
-	[% line = line + 1 %]
-[% END %]
-
 
 <!-- //////////////////////////////// KEY /////// ////////////////////////// -->
-[% key_box_size = 12 %]
 [% key_count = 1 %]
-[% key_padding = 5 %]
 [% IF config.key && config.key_position == 'right' %]
 	[% FOREACH dataset = data %]
 		<rect x="[% x + w + 20 %]" y="[% y + (key_box_size * key_count) + (key_count * key_padding) %]" width="[% key_box_size %]" height="[% key_box_size %]" class="key[% key_count %]"/>

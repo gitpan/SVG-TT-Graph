@@ -5,7 +5,7 @@ use Carp;
 use vars qw($VERSION $AUTOLOAD);
 use Template;
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 # set up TT object
 my %config = (

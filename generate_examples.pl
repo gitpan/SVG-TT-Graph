@@ -21,10 +21,39 @@ my @fields1 = ('Januararyasdasdasd','Feb','Mar','Apr','Mayasdasdasdasdasd');
 my @data_01 = qw(12 45 21 45 32);
 my @data_02 = qw(12 23435 21 3445 345632);
 
+my @fields2 = ('Oct 02','Nov 02','Dec 02','Jan 03','Feb 03','Mar 03','Apr 03','May 03','Jun 03','Jul 03','Aug 03','Sep 03');
+my @data_03 = qw(0 0 0 0 0 0 0 0 0 0 1815 0);
+
 ############ Generate some bar graphs
 
 run_bar('Bar',\@fields1,\@data_01,'small_range');
 run_bar('BarHorizontal',\@fields1,\@data_02,'large_range');
+run_line('Line',\@fields2,\@data_03,'default');
+
+sub run_line {
+	my $type = shift;
+	my $fields = shift;
+	my $data = shift;
+	my $title = shift;
+
+	my $module = "SVG::TT::Graph::$type";
+	
+	## Basic using default config
+	my $graph1 = $module->new({
+		'fields' => $fields,
+	});
+	$graph1->add_data({
+		'data' => $data,
+		'title' => 'Sales 2002 asdfasdfds',
+	});
+	
+	my $outfile1 = "$dir/$type" . "_defaults_" . "$title.svg";
+	open(FH,">$outfile1");
+	print FH $graph1->burn();
+	close(FH);
+	
+}
+
 
 
 sub run_bar {

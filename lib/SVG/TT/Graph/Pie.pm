@@ -3,7 +3,7 @@ package SVG::TT::Graph::Pie;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
@@ -662,25 +662,25 @@ __DATA__
 		[% re = r / e %]
 		[% xe = re * cos(radians_half) FILTER format('%02.10f') %]
 		[% ye = re * sin(radians_half) FILTER format('%02.10f') %]
-		<path d="M[% px_start + xe %] [% pmin_scale_value + ye %] A[% r %] [% r %], 0, 
-		[% IF degrees > 180 && py_end < y %]0[% ELSIF degrees > 180 %]1[% ELSE %]0[% END %], 1, [% x + px_end + xe %] [% y + py_end + ye %] L[% x + xe %] [% y + ye %], Z" class="fill[% count %]"/>
+
+        <path d="M[% px_start + xe %] [% pmin_scale_value + ye %] A[% r %] [% r %], 0, 
+        [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end + xe %] [% y + py_end + ye %] L[% x + xe %] [% y + ye %], Z" class="fill[% count %]"/>
 	
 	[% ELSIF !config.expanded && config.expand_greatest %]
-		<!-- THERE -->
 		[% IF data.0.data.$field == max_value %]
-		[% re = r / e %]
-		[% xe = re * cos(radians_half) FILTER format('%02.10f') %]
-		[% ye = re * sin(radians_half) FILTER format('%02.10f') %]
-		<path d="M[% px_start + xe %] [% pmin_scale_value + ye %] A[% r %] [% r %], 0, 
-		[% IF degrees > 180 && py_end < y %]0[% ELSIF degrees > 180 %]1[% ELSE %]0[% END %], 1, [% x + px_end + xe %] [% y + py_end + ye %] L[% x + xe %] [% y + ye %], Z" class="fill[% count %]"/>
+		    [% re = r / e %]
+		    [% xe = re * cos(radians_half) FILTER format('%02.10f') %]
+		    [% ye = re * sin(radians_half) FILTER format('%02.10f') %]
+		    <path d="M[% px_start + xe %] [% pmin_scale_value + ye %] A[% r %] [% r %], 0, 
+            [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end + xe %] [% y + py_end + ye %] L[% x + xe %] [% y + ye %], Z" class="fill[% count %]"/>
 		[% ELSE %]
 			<path d="M[% px_start %] [% pmin_scale_value %] A[% r %] [% r %], 0, 
-		[% IF degrees > 180 && py_end < y %]0[% ELSIF degrees > 180 %]1[% ELSE %]0[% END %], 1, [% x + px_end %] [% y + py_end %] L[% x %] [% y %], Z" class="fill[% count %]"/>	
+            [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end %] [% y + py_end %] L[% x %] [% y %], Z" class="fill[% count %]"/>    
 		[% END %]
 	
 	[% ELSE %]
 		<path d="M[% px_start %] [% pmin_scale_value %] A[% r %] [% r %], 0, 
-		[% IF degrees > 180 && py_end < y %]0[% ELSIF degrees > 180 %]1[% ELSE %]0[% END %], 1, [% x + px_end %] [% y + py_end %] L[% x %] [% y %], Z" class="fill[% count %]"/>	
+        [% IF percent >= 50 %]1[% ELSE %]0[% END %], 1, [% x + px_end %] [% y + py_end %] L[% x %] [% y %], Z" class="fill[% count %]"/>    
 	[% END %]
 	
 	
