@@ -3,7 +3,7 @@ package SVG::TT::Graph::Line;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.06';
+$VERSION = '0.07';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
@@ -468,67 +468,6 @@ __DATA__
 	stroke: #000000;
 	stroke-width: 0.5px;	
 }
-/* default fill styles */
-.fill1{
-	fill: #cc0000;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill2{
-	fill: #0000cc;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill3{
-	fill: #00cc00;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill4{
-	fill: #ffcc00;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill5{
-	fill: #00ccff;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill6{
-	fill: #ff00ff;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill7{
-	fill: #00ffff;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill8{
-	fill: #ffff00;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill9{
-	fill: #cc6666;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill10{
-	fill: #663399;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill11{
-	fill: #339900;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill12{
-	fill: #9966FF;
-	fill-opacity: 0.2;
-	stroke: none;
-}
 /* default line styles */
 .line1{
 	fill: none;
@@ -572,7 +511,7 @@ __DATA__
 }
 .line9{
 	fill: none;
-	stroke: #ccc6666;
+	stroke: #cc6666;
 	stroke-width: 1px;	
 }
 .line10{
@@ -591,62 +530,62 @@ __DATA__
 	stroke-width: 1px;	
 }
 /* default line styles */
-.key1,.dataPoint1{
+.key1,.fill1{
 	fill: #ff0000;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key2,.dataPoint2{
+.key2,.fill2{
 	fill: #0000ff;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key3,.dataPoint3{
+.key3,.fill3{
 	fill: #00ff00;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key4,.dataPoint4{
+.key4,.fill4{
 	fill: #ffcc00;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key5,.dataPoint5{
+.key5,.fill5{
 	fill: #00ccff;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key6,.dataPoint6{
+.key6,.fill6{
 	fill: #ff00ff;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key7,.dataPoint7{
+.key7,.fill7{
 	fill: #00ffff;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key8,.dataPoint8{
+.key8,.fill8{
 	fill: #ffff00;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key9,.dataPoint9{
+.key9,.fill9{
 	fill: #cc6666;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key10,.dataPoint10{
+.key10,.fill10{
 	fill: #663399;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key11,.dataPoint11{
+.key11,.fill11{
 	fill: #339900;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key12,.dataPoint12{
+.key12,.fill12{
 	fill: #9966FF;
 	stroke: none;
 	stroke-width: 1px;	
@@ -965,7 +904,7 @@ __DATA__
         [% FOREACH field = config.fields %]
             [% IF config.show_data_points %]
                 <!-- datapoint shown -->
-                <circle cx="[% (dw * xcount) + x %]" cy="[% base_line - (dataset.data.$field * divider) %]" r="2.5" class="dataPoint[% line %]"/>
+                <circle cx="[% (dw * xcount) + x %]" cy="[% base_line - (dataset.data.$field * divider) %]" r="2.5" class="fill[% line %]"/>
             [% END %]
             
             [% IF config.show_data_values %]

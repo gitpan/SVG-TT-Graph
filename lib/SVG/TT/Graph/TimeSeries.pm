@@ -8,7 +8,7 @@ use DateTime;
 use POSIX;
 
 use vars qw($VERSION);
-$VERSION = '0.06';
+$VERSION = '0.07';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
@@ -789,7 +789,7 @@ __DATA__
 }
 .line9{
 	fill: none;
-	stroke: #ccc6666;
+	stroke: #cc6666;
 	stroke-width: 1px;	
 }
 .line10{
@@ -809,62 +809,62 @@ __DATA__
 }
 
 /* default line styles */
-.key1,.dataPoint1{
+.key1,.fill1{
 	fill: #ff0000;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key2,.dataPoint2{
+.key2,.fill2{
 	fill: #0000ff;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key3,.dataPoint3{
+.key3,.fill3{
 	fill: #00ff00;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key4,.dataPoint4{
+.key4,.fill4{
 	fill: #ffcc00;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key5,.dataPoint5{
+.key5,.fill5{
 	fill: #00ccff;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key6,.dataPoint6{
+.key6,.fill6{
 	fill: #ff00ff;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key7,.dataPoint7{
+.key7,.fill7{
 	fill: #00ffff;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key8,.dataPoint8{
+.key8,.fill8{
 	fill: #ffff00;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key9,.dataPoint9{
+.key9,.fill9{
 	fill: #cc6666;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key10,.dataPoint10{
+.key10,.fill10{
 	fill: #663399;
 	stroke: none;
 	stroke-width: 1px;	
 }
-.key11,.dataPoint11{
+.key11,.fill11{
     fill: #339900;
     stroke: none;
     stroke-width: 1px;  
 }
-.key12,.dataPoint12{
+.key12,.fill12{
     fill: #9966FF;
     stroke: none;
     stroke-width: 1px;  
@@ -1143,7 +1143,7 @@ __DATA__
             [% IF ((pair.0 >= calc.min_timescale_value) && (pair.0 <= calc.max_timescale_value)) %]
                 <g class="dataLabel[% line %]" [% IF config.rollover_values %] opacity="0" [% END %]>
                 [% IF config.show_data_points %]
-                    <circle cx="[% (dw * (pair.0 - calc.min_timescale_value)) + x %]" cy="[% base_line - (dh * (pair.1 - calc.min_scale_value)) %]" r="2.5" class="dataPoint[% line %]"
+                    <circle cx="[% (dw * (pair.0 - calc.min_timescale_value)) + x %]" cy="[% base_line - (dh * (pair.1 - calc.min_scale_value)) %]" r="2.5" class="fill[% line %]"
                     [% IF config.rollover_values %]
                         onmouseover="evt.target.parentNode.setAttribute('opacity',1);"
                         onmouseout="evt.target.parentNode.setAttribute('opacity',0);"

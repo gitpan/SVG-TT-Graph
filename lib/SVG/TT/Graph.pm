@@ -6,7 +6,7 @@ use vars qw($VERSION $AUTOLOAD);
 use Template;
 use POSIX;
 
-$VERSION = '0.06';
+$VERSION = '0.07';
 
 # set up TT object
 my %config = (

@@ -2,10 +2,21 @@ Revision history for Perl extension SVG::TT::Graph.
 
 TODO - probably!
 	- max_scale_value
-	- format of scale & data values (e.g. £ 34,333.32)
+	- format of scale & data values (e.g.  34,333.32)
 	- extra padding on right for long x labels
 	- Fix bug when text hides in pie chart if opacity off
+0.08
+	- new version 2
 
+0.07
+	Help from Yanick with the following:
+
+	- Bug fixes:
+		#7342 (bad default stylesheet class)
+		#8680 (Typo in defaut Stylesheet for SVG::TT::Graph::TimeSeries)
+		#7541 (BarHorizontal)
+		#7549 (Character width setting in BarHorizontal)
+	
 0.06
 	- Put in comment so people know where to copy the
 	  style sheet from (e.g. not including the <style> or CDATA)

@@ -2,7 +2,7 @@ Changes
 Makefile.PL
 MANIFEST
 INSTALL
-generate_examples.pl
+generate_examples_pl
 t/01_main.t
 t/02_basic.t
 t/03_autoload_methods.t
@@ -14,3 +14,4 @@ lib/SVG/TT/Graph/BarLine.pm
 lib/SVG/TT/Graph/BarHorizontal.pm
 lib/SVG/TT/Graph/TimeSeries.pm
 
+META.yml                                 Module meta-data (added by MakeMaker)

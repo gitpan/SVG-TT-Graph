@@ -387,7 +387,7 @@ __DATA__
 	fill: #000000;
 	font-size: 14px;
 	font-family: "Arial", sans-serif;
-	font-weight: normal;
+	font-weight: bold;
 }
 .subTitle{
 	text-anchor: middle;
@@ -549,7 +549,7 @@ __DATA__
 	[% x = 0 %]
 	[% y = 0 %]
 
-	[% char_width = 9 %]
+	[% char_width = 7 %]
 
 <!-- CALC WIDTH AND X COORD DIMENSIONS -->
 	<!-- reduce width of graph area if there is labelling on y axis -->
@@ -565,8 +565,8 @@ __DATA__
 				
 		[% space_b4_axis = char_width * max_ylabel_length %]
 
-		[% w = w - space_b4_axis - char_width %]
-		[% x = x + space_b4_axis + char_width %]
+		[% w = w - space_b4_axis %]
+		[% x = x + space_b4_axis %]
 	[% END %]
 	
 	<!-- corrects space around graph when very small y labels are used -->
@@ -756,7 +756,7 @@ __DATA__
 		[% ELSE %]
 			[% y_xtitle = 35 %]
 		[% END %]
-		<text x="[% (w / 2) + x %]" y="[% h + y + y_xtitle + stagger %]" class="xAxisTitle">[% config.y_title %]</text>
+		<text x="[% (w / 2) + x %]" y="[% h + y + y_xtitle + stagger %]" class="xAxisTitle">[% config.x_title %]</text>
 	[% END %]	
 
 <!-- y axis title -->
