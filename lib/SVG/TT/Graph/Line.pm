@@ -3,7 +3,7 @@ package SVG::TT::Graph::Line;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.07';
+$VERSION = '0.09';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
@@ -816,7 +816,7 @@ __DATA__
 				[% stagger_count = 0 %]
 			[% ELSE %]
 				<text x="[% x + i %]" y="[% base_line + 15 + stagger %]" [% IF config.rotate_x_labels %]transform="rotate(90 [% x + i - half_char_height %] [% base_line + 15 + stagger %])" style="text-anchor: start" [% END %]class="xAxisLabels">[% field %]</text>
-				<path d="M[% x + i %] [% base_line %], v[% stagger %]" class="staggerGuideLine" />
+				<path d="M[% x + i %] [% base_line %] v[% stagger %]" class="staggerGuideLine" />
 			[% END %]
 		[% END %]
 	[% i = i + dw %]
@@ -884,7 +884,7 @@ __DATA__
         <path d="M[% x %] [% base_line %] L
         [% xcount = 0 %]
         [% FOREACH field = config.fields %]
-            [% (dw * xcount) + x %] [% base_line - (dataset.data.$field * divider) %],
+            [% (dw * xcount) + x %] [% base_line - (dataset.data.$field * divider) %]
             [% xcount = xcount + 1 %]
         [% END %]
         [% (dw * (xcount - 1)) + x %] [% base_line %] Z" class="fill[% line %]"/>
@@ -895,7 +895,7 @@ __DATA__
     [% xcount = 0 %]
     [% FOREACH field = config.fields %]
         [% IF xcount == 1 %] L [% END %]
-        [% (dw * xcount) + x %] [% base_line - (dataset.data.$field * divider) %],
+        [% (dw * xcount) + x %] [% base_line - (dataset.data.$field * divider) %]
         [% xcount = xcount + 1 %]       
     [% END %]" class="line[% line %]"/>
     

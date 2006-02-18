@@ -3,7 +3,7 @@ package SVG::TT::Graph::Bar;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.07';
+$VERSION = '0.09';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
@@ -755,7 +755,7 @@ __DATA__
 				[% stagger_count = 0 %]
 			[% ELSE %]
 				<text x="[% x + i + (dw / 2) - (bar_gap / 2) %]" y="[% base_line + 15 + stagger %]" [% IF config.rotate_x_labels %]transform="rotate(90 [% x + i + (dw / 2) - (bar_gap / 2) - half_char_height %] [% base_line + 15 + stagger %])" style="text-anchor: start" [% END %]class="xAxisLabels">[% field %]</text>
-				<path d="M[% x + i + (dw / 2) - (bar_gap / 2) %] [% base_line %], v[% stagger %]" class="staggerGuideLine" />
+				<path d="M[% x + i + (dw / 2) - (bar_gap / 2) %] [% base_line %] v[% stagger %]" class="staggerGuideLine" />
 			[% END %]
 		[% END %]
 	[% i = i + dw %]

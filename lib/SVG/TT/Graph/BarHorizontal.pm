@@ -3,7 +3,7 @@ package SVG::TT::Graph::BarHorizontal;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.06';
+$VERSION = '0.09';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
@@ -735,7 +735,7 @@ __DATA__
 			[% ELSE %]
 				<text x="[% x + (dx * count) %]" y="[% base_line + 15 + stagger %]" class="xAxisLabels" style="text-anchor: middle;">[% y_value FILTER format('%2.01f') %]</text>
 				<path d="M[% x + (dx * count) %] [% base_line %] V[% y %]" class="guideLines"/>
-				<path d="M[% x + (dx * count) %] [% base_line %], v[% stagger %]" class="staggerGuideLine" />
+				<path d="M[% x + (dx * count) %] [% base_line %] v[% stagger %]" class="staggerGuideLine" />
 			[% END %]
 		[% END %]
 		[% y_value = y_value + scale_division %]
