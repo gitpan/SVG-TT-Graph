@@ -6,7 +6,7 @@ use vars qw($VERSION $AUTOLOAD);
 use Template;
 use POSIX;
 
-$VERSION = '0.09';
+$VERSION = '0.10';
 
 # set up TT object
 my %config = (
@@ -365,6 +365,7 @@ None by default.
 Thanks to Foxtons for letting us put this on CPAN.
 Todd Caine for heads up on reparsing the template (but not using atm)
 David Meibusch for TimeSeries and a load of other ideas
+Thanks for all the patches supplied by Andrew Ruthven and others
 
 =head1 AUTHOR
 

@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         SVG-TT-Graph
-version:      0.09
+version:      0.10
 version_from: lib/SVG/TT/Graph.pm
 installdirs:  site
 requires:
@@ -10,4 +10,4 @@ requires:
     Template:                      2.08
 
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+generated_by: ExtUtils::MakeMaker version 6.30
