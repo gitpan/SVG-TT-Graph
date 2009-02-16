@@ -3,7 +3,7 @@ package SVG::TT::Graph::Bar;
 use strict;
 use Carp;
 use vars qw($VERSION);
-$VERSION = '0.09';
+$VERSION = '0.11';
 
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);

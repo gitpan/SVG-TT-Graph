@@ -2,6 +2,9 @@ package SVG::TT::Graph::TimeSeries;
 
 use strict;
 use Carp;
+use vars qw($VERSION);
+$VERSION = '0.11';
+
 use Data::Dumper;
 use HTTP::Date;
 use DateTime;

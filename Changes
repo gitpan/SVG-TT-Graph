@@ -1,5 +1,8 @@
 Revision history for Perl extension SVG::TT::Graph.
 
+0.12 - Mon Feb 16 12:00:00 EST 2009
+    Missed updating the versions for some of the sub libraries.
+
 0.11 - Sun Feb 15 22:54:00 EST 2009
     Applied patches:
     http://rt.cpan.org/Ticket/Display.html?id=38441 - Ampersands in Fields cause XML error
