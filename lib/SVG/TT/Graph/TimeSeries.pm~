@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use SVG::TT::Graph;
 use base qw(SVG::TT::Graph);
-use vars qw($VERSION);
+use vars qw($VERSION $TEMPLATE_FH);
 $VERSION = $SVG::TT::Graph::VERSION;
 $TEMPLATE_FH = \*DATA;
 
@@ -737,7 +737,7 @@ __DATA__
 
 [% IF config.key %]
   <!-- Script to toggle paths when their key is clicked on -->
-  <script language="JavaScript">
+  <script language="JavaScript"><![CDATA[
   function togglePath( series ) {
     var path    = document.getElementById('groupDataSeries' + series)
     var points  = document.getElementById('groupDataLabels' + series)
@@ -750,7 +750,7 @@ __DATA__
       points.setAttribute('opacity',0)
     }
   }
-  </script>
+  ]]></script>
 [% END %]
 
 <!-- svg bg -->
