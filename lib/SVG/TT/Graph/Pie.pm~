@@ -460,11 +460,11 @@ __DATA__
   <!-- Script to toggle paths when their key is clicked on -->
   <script language="JavaScript">
   function togglePath( series ) {
-    var text = document.getElementById('n' + series);
+    var text = document.getElementById('n' + series)
     if ( text.getAttribute('opacity') == 0 ) {
-      text.setAttribute('opacity',1);
+      text.setAttribute('opacity',1)
     } else {
-      text.setAttribute('opacity',0);
+      text.setAttribute('opacity',0)
     }
   }
   </script>
