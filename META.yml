@@ -1,14 +1,15 @@
 ---
 abstract: 'Base object for generating SVG Graphs'
 author:
-  - 'Leo Lapworth (LLAP@cuckoo.org) and Stephen Morgan (TT and SVG)'
+  - 'Leo Lapworth <LLAP@cuckoo.org>'
 build_requires:
-  ExtUtils::MakeMaker: 6.42
+  ExtUtils::MakeMaker: 6.57
   Test::More: 0
 configure_requires:
-  ExtUtils::MakeMaker: 6.42
+  ExtUtils::MakeMaker: 6.57
 distribution_type: module
-generated_by: 'Module::Install version 1.01'
+dynamic_config: 1
+generated_by: 'Module::Install version 1.04'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -29,4 +30,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://github.com/ranguard/svg-tt-graph.git
-version: 0.18
+version: 0.19
