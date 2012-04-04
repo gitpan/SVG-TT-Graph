@@ -1,5 +1,10 @@
 Revision history for Perl extension SVG::TT::Graph.
 
+0.xx
+  - Fixed wrong formatting of Y labels in SVG::TT:Graph::BarHorizontal (patch by
+    Erin Schönhals)
+  - Fixed wrong formatting of Y labels in SVG::TT::Graph::Bar
+
 0.19
   - Fixed warning messages with missing data title (#69691, reported by
     dean@fragfest.com.au, patch by Florent Angly)
