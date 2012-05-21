@@ -9,11 +9,11 @@ use POSIX;
 
 require 5.6.1;
 
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 =head1 NAME
 
-SVG::TT::Graph - Base object for generating SVG Graphs
+SVG::TT::Graph - Base module for generating SVG graphics
 
 =head1 SYNOPSIS
 
@@ -91,10 +91,30 @@ SVG::TT::Graph - Base object for generating SVG Graphs
 
 =head1 DESCRIPTION
 
-This package should be used as a base for creating SVG graphs. If XML::Tidy is
-installed, the SVG files generated are tidied.
+This package is a base module for creating graphs in Scalable Vector Format
+(SVG). Do not use this module directly. Instead, use one of the following
+modules to create the plot of your choice:
 
-See SVG::TT::Graph::Line for an example.
+=over
+
+=item L<SVG::TT::Graph::Line>
+
+=item L<SVG::TT::Graph::Bar>
+
+=item L<SVG::TT::Graph::BarHorizontal>
+
+=item L<SVG::TT::Graph::BarLine>
+
+=item L<SVG::TT::Graph::Pie>
+
+=item L<SVG::TT::Graph::TimeSeries>
+
+=item L<SVG::TT::Graph::XY>
+
+=back
+
+If XML::Tidy is installed, the SVG files generated can be tidied. If
+Compress::Zlib is available, the SVG files can also be compressed to SVGZ.
 
 =cut
 
@@ -253,10 +273,12 @@ sub burn {
   my %config = (
     POST_CHOMP   => 1,
     INCLUDE_PATH => '/',
+    #STRICT      => 1, # we should probably enable this for strict checking
     #DEBUG       => 'undef', # TT warnings on, useful for debugging, finding undef values
   );
   my $tt = Template->new( \%config );
   my $file;
+
   my $template_response = $tt->process( \$template, \%vals, \$file );
   if($tt->error()) {
     croak "Template error: " . $tt->error . "\n" if $tt->error;
@@ -541,6 +563,7 @@ L<SVG::TT::Graph::BarHorizontal>,
 L<SVG::TT::Graph::BarLine>,
 L<SVG::TT::Graph::Pie>,
 L<SVG::TT::Graph::TimeSeries>,
+L<SVG::TT::Graph::XY>,
 L<Compress::Zlib>,
 L<XML::Tidy>
 

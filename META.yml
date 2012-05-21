@@ -1,5 +1,5 @@
 ---
-abstract: 'Base object for generating SVG Graphs'
+abstract: 'Base module for generating SVG graphics'
 author:
   - 'Leo Lapworth <LLAP@cuckoo.org>'
 build_requires:
@@ -30,4 +30,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://github.com/ranguard/svg-tt-graph.git
-version: 0.20
+version: 0.21

@@ -1,6 +1,10 @@
 Revision history for Perl extension SVG::TT::Graph.
 
-0.xx
+0.21
+  - New type of graph available: XY (written by Florent Angly, but largely based
+    on the TimeSeries module by David Meibusch)
+
+0.20
   - Fixed wrong formatting of Y labels in SVG::TT:Graph::BarHorizontal (patch by
     Erin Schönhals)
   - Fixed wrong formatting of Y labels in SVG::TT::Graph::Bar
