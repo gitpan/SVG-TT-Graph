@@ -28,6 +28,7 @@ requires:
   Template: 2.08
   perl: 5.6.1
 resources:
+  bugtracker: https://github.com/ranguard/svg-tt-graph/issues
   license: http://dev.perl.org/licenses/
   repository: git://github.com/ranguard/svg-tt-graph.git
-version: 0.21
+version: 0.22

@@ -9,7 +9,7 @@ use POSIX;
 
 require 5.6.1;
 
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 =head1 NAME
 
@@ -425,7 +425,7 @@ sub _range_calc () {
     return ($max,$division,1);
   }
   
-  if ($value < 1) {
+  if (($value < 1) and ($value > 0)) {
     while ($value < 1) {
       $value *= 10;
       $count++;
