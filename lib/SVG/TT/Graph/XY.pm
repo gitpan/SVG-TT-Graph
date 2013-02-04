@@ -106,14 +106,22 @@ to using the internal style sheet.
   my @data_cpu  = (0.3, 23, 0.5, 54, 1.0, 67, 1.8, 12);
   or
   my @data_cpu = ([0.3,23], [0.5,54], [1.0,67], [1.8,12]);
+  or
+  my @data_cpu = ([0.3,23,'23%'], [0.5,54,'54%'], [1.0,67,'67%'], [1.8,12,'12%']);
 
   $graph->add_data({
     'data' => \@data_cpu,
     'title' => 'CPU',
   });
 
-This method allows you to add data to the graph object.
-The data is expected to be a list of pairs of numbers.
+This method allows you to add data to the graph object.  The
+data are expected to be either a list of scalars (in which
+case pairs of elements are taken to be X,Y pairs) or a list
+of array references.  In the latter case, the first two
+elements in each referenced array are taken to be X and Y,
+and the optional third element (if present) is used as the
+text to display for that point for show_data_values and
+rollover_values; otherwise the Y value itself is displayed.
 It can be called several times to add more data sets in.
 
 =head2 clear_data()
@@ -167,7 +175,7 @@ Whether or not to tidy the content of the SVG file (XML::Tidy required).
 =item style_sheet()
 
 Set the path to an external stylesheet, set to '' if
-you want to revert back to using the defaut internal version.
+you want to revert back to using the default internal version.
 
 The default stylesheet handles up to 12 data sets. All data series over
 the 12th will have no style and be in black. If you have over 12 data
@@ -185,7 +193,8 @@ Use random colors in the internal stylesheet.
 
 =item show_data_values()
 
-Show the value of each element of data on the graph.
+Show the value of each element of data on the graph (or
+optionally a user-defined label; see add_data).
 
 =item show_data_points()
 
@@ -866,6 +875,9 @@ __DATA__
 <!-- //////////////////////////////  AXIS DISTRIBUTIONS //////////////////////////// -->
 <!-- x axis scaling -->
 [% dx = calc.xscale_range %]
+[% IF dx == 0 %]
+  [% dx = 1 %]
+[% END %]
 [% dw = w / dx %]
 <!-- dx [% dx %] dw [% dw %] -->
 
@@ -914,6 +926,9 @@ __DATA__
 [% top_pad = h / 40 %]
 
 [% dy = calc.yscale_range %]
+[% IF dy == 0 %]
+  [% dy = 1 %]
+[% END %]
 [% dh = (h - top_pad) / dy %]
 <!-- dy [% dy %] dh [% dh %] yscale_division [% calc.yscale_division %] max_yscale_value [% calc.max_yscale_value %]-->
 

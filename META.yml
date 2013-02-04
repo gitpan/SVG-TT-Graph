@@ -31,4 +31,4 @@ resources:
   bugtracker: https://github.com/ranguard/svg-tt-graph/issues
   license: http://dev.perl.org/licenses/
   repository: git://github.com/ranguard/svg-tt-graph.git
-version: 0.22
+version: 0.23
